@@ -3,10 +3,14 @@
 @theme {
   /* Fonts */
   --font-profont: var(--font-profont);
+  --font-monoton: var(--font-monoton);
 
   /* Colors */
-  --color-green-dark: #1d3738;
-  --color-green-light: #1d3738;
+  --color-purple-main: #b86cff; /* primary neon */
+  --color-purple-soft: #d7b5ff; /* soft glow */
+  --color-purple-hot: #ff4dff; /* energetic accent */
+  --color-purple-blue: #7a6cff; /* cold cyber tone */
+  --color-purple-dark: #2b0f3f; /* background contrast */
 }
 
 @layer base {
@@ -34,7 +38,7 @@
   }
 
   body {
-    background: #010103;
+    background: var(--color-purple-dark);
     color: #ffffff;
     overflow-x: hidden;
     margin: 0;
@@ -44,7 +48,7 @@
   /* Dark mode support - respects OS preference */
   @media (prefers-color-scheme: dark) {
     body {
-      background: #000000;
+      background: var(--color-purple-dark);
       color: #ffffff;
     }
   }
@@ -52,7 +56,7 @@
   @media (prefers-color-scheme: light) {
     body {
       background: #ffffff;
-      color: #010103;
+      color: var(--color-purple-dark);
     }
   }
 
@@ -107,6 +111,279 @@
   }
 }
 
+@layer components {
+  .cyber-root {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--color-purple-dark);
+    color: var(--color-purple-main);
+  }
+
+  .cyber-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at center,
+      var(--color-purple-dark),
+      #000 70%
+    );
+  }
+
+  .cyber-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(184, 108, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(184, 108, 255, 0.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .cyber-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle,
+      rgba(184, 108, 255, 0.15),
+      transparent 60%
+    );
+  }
+
+  .cyber-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cyber-title {
+    font-size: 3.5rem;
+    letter-spacing: 0.4em;
+    color: var(--color-purple-main);
+    text-shadow: 0 0 20px var(--color-purple-main);
+  }
+
+  @keyframes neon-flicker1 {
+    0%,
+    18%,
+    22%,
+    25%,
+    53%,
+    57%,
+    100% {
+      opacity: 1;
+      text-shadow: 0 0 20px var(--color-purple-main);
+    }
+    20%,
+    24%,
+    55% {
+      opacity: 0.3;
+      text-shadow: none;
+    }
+  }
+
+  .cyber-title.flicker {
+    animation: neon-flicker1 4s infinite;
+  }
+
+  .cyber-tools {
+    margin-top: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .tool-btn {
+    padding: 0.75rem 2.5rem;
+    background: rgba(184, 108, 255, 0.08);
+    color: var(--color-purple-soft);
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+  }
+
+
+
+  /* ============================= */
+  /*        TITLE FLICKER          */
+  /* ============================= */
+
+  @keyframes neon-flicker2 {
+    0%,
+    18%,
+    22%,
+    25%,
+    53%,
+    57%,
+    100% {
+      opacity: 1;
+      text-shadow: 0 0 20px var(--color-purple-main);
+    }
+    20%,
+    24%,
+    55% {
+      opacity: 0.3;
+      text-shadow: none;
+    }
+  }
+
+  .cyber-title.flicker {
+    animation: neon-flicker2 4s infinite;
+  }
+
+  /* ============================= */
+  /*      FIREFLY ANIMATIONS       */
+  /* ============================= */
+
+  .firefly-field {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .firefly-center {
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+  }
+
+  .firefly {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: var(--color-purple-hot);
+    filter: drop-shadow(0 0 6px var(--color-purple-hot));
+
+    opacity: 0.8;
+
+    animation:
+      firefly-move 14s linear infinite,
+      firefly-blink 3s ease-in-out infinite;
+
+    animation-delay: calc(var(--i) * -2s);
+  }
+
+  /* movement inside container */
+  @keyframes firefly-move {
+    0% {
+      left: 10%;
+      top: 20%;
+    }
+    20% {
+      left: 80%;
+      top: 30%;
+    }
+    40% {
+      left: 60%;
+      top: 85%;
+    }
+    60% {
+      left: 25%;
+      top: 70%;
+    }
+    80% {
+      left: 90%;
+      top: 15%;
+    }
+    100% {
+      left: 10%;
+      top: 20%;
+    }
+  }
+
+  @keyframes firefly-blink {
+    0%,
+    20%,
+    40%,
+    60%,
+    80%,
+    100% {
+      opacity: 0.2;
+    }
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+      opacity: 1;
+    }
+  }
+
+  /* variations */
+  .firefly:nth-child(1) {
+    animation-duration: 13s;
+  }
+  .firefly:nth-child(2) {
+    animation-duration: 18s;
+  }
+  .firefly:nth-child(3) {
+    animation-duration: 15s;
+  }
+  .firefly:nth-child(4) {
+    animation-duration: 21s;
+  }
+  .firefly:nth-child(5) {
+    animation-duration: 17s;
+  }
+  .firefly:nth-child(6) {
+    animation-duration: 23s;
+  }
+
+  /* ============================= */
+  /*  Hero Title Neon ANIMATIONS   */
+  /* ============================= */
+
+  .neo-title {
+    font-family: var(--font-monoton);
+    font-size: 5rem;
+    color: var(--color-purple-main);
+    text-transform: uppercase;
+    text-shadow:
+      0 0 2px var(--color-purple-main),
+      0 0 6px rgba(184, 108, 255, 0.7),
+      0 0 12px rgba(184, 108, 255, 0.6),
+      0 0 20px rgba(184, 108, 255, 0.5);
+    animation: neon-blink 2s infinite alternate;
+    white-space: nowrap;
+  }
+
+  @keyframes neon-blink {
+    44% {
+      opacity: 1;
+    }
+
+    45% {
+      opacity: 0.7;
+    }
+
+    46% {
+      opacity: 1;
+    }
+
+    98% {
+      opacity: 1;
+    }
+
+    99% {
+      opacity: 0.5;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+}
+
 @utility max-width-container {
   max-width: 1536px;
   margin-left: auto;
@@ -126,8 +403,8 @@
 }
 
 @utility section-container {
-  background-color: white;
-  color: black;
+  background-color: #0b0214;
+  color: var(--color-purple-soft);
   padding: 2rem 1rem;
   margin: 0 auto;
 
@@ -137,5 +414,220 @@
 
   @media (width >= 64rem /* 1024px */) {
     padding-inline: calc(var(--spacing) * 8) /* 2rem = 32px */;
+  }
+}
+
+/* Glitch Animation */
+@utility glitch-text {
+  animation: glitch 1s infinite;
+  text-shadow:
+    2px 2px 0 var(--color-purple-main),
+    -2px -2px 0 var(--color-purple-soft);
+}
+
+@utility cyber-blink {
+  animation: blink 1s infinite;
+  color: var(--color-purple-hot);
+}
+
+@keyframes glitch {
+  0%,
+  100% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+}
+
+/* Cyber Wave */
+
+@utility cyber-wave {
+  animation: cyber-wave 2s ease-in-out infinite;
+}
+
+@keyframes cyber-wave {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(-10deg) scale(1.1);
+  }
+  50% {
+    transform: rotate(10deg) scale(1);
+  }
+  75% {
+    transform: rotate(-10deg) scale(1.1);
+  }
+}
+
+/* Animation classes */
+@utility glitch-layer-1 {
+  animation: glitchFx1 800ms infinite step-end;
+}
+
+@utility glitch-layer-2 {
+  animation: glitchFx2 900ms infinite step-end;
+}
+
+@utility glitch-layer-3 {
+  animation: glitchFx3 1000ms infinite step-end;
+}
+
+@utility glitch-skew {
+  animation: glitchSkew 1200ms infinite step-end;
+}
+
+@utility flicker-animation {
+  animation: flickerAnimation 2s infinite;
+}
+
+@utility click-glitch {
+  animation: clickGlitch 500ms step-end forwards;
+}
+
+@keyframes glitchFx1 {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  30% {
+    transform: translateX(0);
+  }
+  40% {
+    transform: translateX(12px);
+  }
+  50% {
+    transform: translateX(8px);
+  }
+  60% {
+    transform: translateX(24px);
+  }
+  70% {
+    transform: translateX(2px);
+  }
+  80% {
+    transform: translateX(-4px);
+  }
+  90% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes glitchFx2 {
+  0% {
+    transform: translateX(4px);
+  }
+  10% {
+    transform: translateX(-12px);
+  }
+  20% {
+    transform: translateX(-2px);
+  }
+  30% {
+    transform: translateX(1px);
+  }
+  40%,
+  50%,
+  60%,
+  70% {
+    transform: translateX(0);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+  90% {
+    transform: translateX(-2px);
+  }
+  100% {
+    transform: translateX(-15px);
+  }
+}
+
+@keyframes glitchFx3 {
+  0% {
+    transform: translateX(4px);
+  }
+  10% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(4px);
+  }
+  30% {
+    transform: translateX(0);
+  }
+  40% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(0);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  70% {
+    transform: translateX(0);
+  }
+  80% {
+    transform: translateX(12px);
+  }
+  90% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-12px);
+  }
+}
+
+@keyframes glitchSkew {
+  0% {
+    transform: skew(0deg);
+  }
+  10% {
+    transform: skew(1deg);
+  }
+  20% {
+    transform: skew(-2deg);
+  }
+  30% {
+    transform: skew(1.5deg);
+  }
+  40% {
+    transform: skew(-1deg);
+  }
+  50% {
+    transform: skew(2deg);
+  }
+  60% {
+    transform: skew(-1.5deg);
+  }
+  70% {
+    transform: skew(1.5deg);
+  }
+  80% {
+    transform: skew(-2deg);
+  }
+  90% {
+    transform: skew(1deg);
+  }
+  100% {
+    transform: skew(0deg);
   }
 }
