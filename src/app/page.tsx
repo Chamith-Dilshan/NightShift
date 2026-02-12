@@ -1,7 +1,7 @@
 "use client";
 
-import CyberBackground from "./components/CyberBackground";
-import { GlitchButton } from "./components/GlitchButton";
+import CyberBackground from "../components/CyberBackground";
+import { GlitchButton } from "../components/GlitchButton";
 
 export default function Home() {
   return (
