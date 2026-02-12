@@ -1,9 +1,12 @@
-function generateFFmpegCommand(opts: VideoOptions): string[] {
+function generateFFmpegCommand(opts: VideoSlice): string[] {
   const args: string[] = [];
 
-  if (!opts.inputFile) return [];
+  if (!opts.inputFiles || opts.inputFiles.length === 0) return [];
 
-  args.push("ffmpeg", "-i", opts.inputFile.name);
+  args.push("ffmpeg");
+  for (const inputFile of opts.inputFiles) {
+    args.push("-i", inputFile);
+  }
 
   if (opts.video.enabled) {
     if (opts.video.codec) args.push("-c:v", opts.video.codec);

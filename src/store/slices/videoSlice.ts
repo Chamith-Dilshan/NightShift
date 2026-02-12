@@ -1,16 +1,21 @@
-interface VideoOptions {
-  inputFile: File | null;
+interface VideoSlice {
+  inputFiles: string[];
   outputName: string;
   outputDir: string;
 
   format: "mp4" | "webm" | "gif" | "custom";
+  commandMode: "auto" | "manual";
+  manualCommand: string;
 
   video: {
     enabled: boolean;
     codec: string;
+    crf: number;
+    preset: string;
     resolution: string;
     frameRate: number;
     bitrate: string;
+    fps: number;
   };
 
   audio: {
