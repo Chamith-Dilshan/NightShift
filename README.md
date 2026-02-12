@@ -10,3 +10,10 @@ refer https://tauri.app/start/create-project/
 refer https://tauri.app/start/frontend/nextjs/
 4. add "  output: 'export'," to your nextconfig file
 5 add script " "tauri": "tauri""
+
+
+npm install @tanstack/react-form zod @hookform/resolvers
+npm install @reduxjs/toolkit react-redux
+npm install @tanstack/react-query
+npm install lucide-react
+npx shadcn@latest init
