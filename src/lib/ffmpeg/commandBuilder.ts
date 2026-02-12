@@ -1,58 +1,101 @@
-function generateFFmpegCommand(opts: VideoSlice): string[] {
-  const args: string[] = [];
+export function generateFFmpegCommand(opts: VideoSlice): string[] {
+  if (!opts.inputFiles?.length) return [];
 
-  if (!opts.inputFiles || opts.inputFiles.length === 0) return [];
+  const args: string[] = ["ffmpeg"];
 
-  args.push("ffmpeg");
+  // Inputs
   for (const inputFile of opts.inputFiles) {
     args.push("-i", inputFile);
   }
 
+  // ----------------------------
+  // VIDEO SETTINGS
+  // ----------------------------
   if (opts.video.enabled) {
     if (opts.video.codec) args.push("-c:v", opts.video.codec);
+    if (opts.video.crf) args.push("-crf", String(opts.video.crf));
+    if (opts.video.preset) args.push("-preset", opts.video.preset);
+
     if (opts.video.bitrate) args.push("-b:v", opts.video.bitrate);
-    if (opts.video.frameRate) args.push("-r", `${opts.video.frameRate}`);
-    if (opts.video.resolution)
-      args.push("-vf", `scale=${opts.video.resolution}`);
+    if (opts.video.frameRate) args.push("-r", String(opts.video.frameRate));
   } else {
     args.push("-vn");
   }
 
+  // ----------------------------
+  // AUDIO SETTINGS
+  // ----------------------------
   if (opts.audio.enabled) {
     if (opts.audio.codec) args.push("-c:a", opts.audio.codec);
     if (opts.audio.bitrate) args.push("-b:a", opts.audio.bitrate);
-    if (opts.audio.channels) args.push("-ac", `${opts.audio.channels}`);
+    if (opts.audio.channels) args.push("-ac", String(opts.audio.channels));
   } else {
     args.push("-an");
   }
 
-  // Add filters
-  const filterList: string[] = [];
-  if (opts.filters.grayscale) filterList.push("hue=s=0");
-  if (opts.filters.blur > 0)
-    filterList.push(`gblur=sigma=${opts.filters.blur}`);
-  if (opts.filters.saturation !== 1)
-    filterList.push(`eq=saturation=${opts.filters.saturation}`);
+  // ----------------------------
+  // BUILD FILTER CHAIN (ONE -vf)
+  // ----------------------------
+  const vfFilters: string[] = [];
 
-  if (filterList.length > 0) {
-    args.push("-vf", filterList.join(","));
+  // Resolution scaling
+  if (opts.video.resolution) {
+    vfFilters.push(`scale=${opts.video.resolution}`);
+  }
+
+  // Filters
+  if (opts.filters.grayscale) {
+    vfFilters.push("hue=s=0");
+  }
+
+  if (opts.filters.blur > 0) {
+    vfFilters.push(`gblur=sigma=${opts.filters.blur}`);
+  }
+
+  if (opts.filters.sharpen > 0) {
+    vfFilters.push(`unsharp=5:5:${opts.filters.sharpen}`);
+  }
+
+  if (opts.filters.saturation !== 1) {
+    vfFilters.push(`eq=saturation=${opts.filters.saturation}`);
   }
 
   // Transforms
-  if (opts.transforms.rotate)
-    args.push("-vf", `transpose=${opts.transforms.rotate / 90}`);
+  if (opts.transforms.rotate !== 0) {
+    const transposeValue = opts.transforms.rotate / 90;
+    vfFilters.push(`transpose=${transposeValue}`);
+  }
 
-  // Watermark
+  if (opts.transforms.flipHorizontal) {
+    vfFilters.push("hflip");
+  }
+
+  if (opts.transforms.flipVertical) {
+    vfFilters.push("vflip");
+  }
+
+  // Apply filters only once
+  if (vfFilters.length > 0) {
+    args.push("-vf", vfFilters.join(","));
+  }
+
+  // ----------------------------
+  // WATERMARK (FILTER COMPLEX)
+  // ----------------------------
   if (opts.watermark.file) {
+    args.push("-i", opts.watermark.file.name);
+
     args.push(
-      "-i",
-      opts.watermark.file.name,
       "-filter_complex",
-      `overlay=${opts.watermark.position}:format=auto,format=yuv420p`,
+      `overlay=${opts.watermark.position}:format=auto:alpha=${opts.watermark.opacity}`,
     );
   }
 
-  args.push(`${opts.outputDir}/${opts.outputName}`);
+  // ----------------------------
+  // OUTPUT FORMAT
+  // ----------------------------
+  const outputFile = `${opts.outputDir}/${opts.outputName}.${opts.format}`;
+  args.push(outputFile);
 
   return args;
 }
