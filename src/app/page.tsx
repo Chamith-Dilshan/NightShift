@@ -3,6 +3,7 @@
 import { FireflyField } from "@/components/FireFlyField";
 import CyberBackground from "../components/CyberBackground";
 import { GlitchButton } from "../components/GlitchButton";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -18,15 +19,21 @@ export default function Home() {
         </FireflyField>
 
         <div className="cyber-tools">
-          <GlitchButton className="sm:w-fit w-full sm:min-w-96">
-            Video Tool
-          </GlitchButton>
-          <GlitchButton className="sm:w-fit w-full sm:min-w-96">
-            Image Tool
-          </GlitchButton>
-          <GlitchButton className="sm:w-fit w-full sm:min-w-96">
-            ⚙ Custom Command
-          </GlitchButton>
+          <Link href="/video">
+            <GlitchButton className="sm:w-fit w-full sm:min-w-96">
+              Video Tool
+            </GlitchButton>
+          </Link>
+          <Link href="/image">
+            <GlitchButton className="sm:w-fit w-full sm:min-w-96">
+              Image Tool
+            </GlitchButton>
+          </Link>
+          <Link href="/custom">
+            <GlitchButton className="sm:w-fit w-full sm:min-w-96">
+              ⚙ Custom Command
+            </GlitchButton>
+          </Link>
         </div>
       </div>
     </main>
