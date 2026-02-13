@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import PanelBlock from "@/components/PanelBlock";
+import InputPanel from "@/components/videoTool/InputPanel";
 
 const panels = [
   { key: "input", label: "📂 Input" },
@@ -54,9 +55,7 @@ const VideoToolPage = () => {
             {/* ---------- Options Area (Vertical Scroll) ---------- */}
             <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
               {activePanel === "input" && (
-                <PanelBlock title="Input Files">
-                  <Button>Select Video / Audio / Image Files</Button>
-                </PanelBlock>
+                <InputPanel/>
               )}
 
               {activePanel === "output" && (

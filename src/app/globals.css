@@ -782,3 +782,29 @@
     transform: skew(0deg);
   }
 }
+
+
+@utility scrollbar-thin {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-brand-500) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--color-brand-500);
+    border-radius: 100%;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-brand-400);
+  }
+}

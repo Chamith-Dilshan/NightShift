@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { monotonFont, proFont } from "./fonts";
-import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: "NightShift Tool",
@@ -15,8 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${proFont.variable} ${monotonFont.variable} antialiased`}>
-        <Providers>{children}</Providers>
+      <body
+        className={`${proFont.variable} ${monotonFont.variable} antialiased`}
+      >
+        {children}
       </body>
     </html>
   );

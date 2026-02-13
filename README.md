@@ -17,3 +17,8 @@ npm install @reduxjs/toolkit react-redux
 npm install @tanstack/react-query
 npm install lucide-react
 npx shadcn@latest init
+npm i @tauri-apps/api
+npm install @tauri-apps/plugin-dialog
+
+for tauri - 
+cargo add tauri-plugin-dialog
