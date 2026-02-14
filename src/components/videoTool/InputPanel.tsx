@@ -7,8 +7,8 @@ import { Trash2, UploadCloud } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { addInputFiles, removeInputFile } from "@/store/slices/videoSlice";
-import { useAppDispatch, useAppSelector } from "@/hooks/videoToolHooks";
+import { addInputFiles, removeInputFile } from "@/store/videoTool/videoSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
 export default function InputPanel() {
   const dispatch = useAppDispatch();

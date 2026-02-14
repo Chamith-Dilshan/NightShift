@@ -1,4 +1,4 @@
-import { videoSchema } from "@/lib/ffmpeg/videoSchema";
+import { videoSchema } from "@/store/videoTool/videoSchema";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 

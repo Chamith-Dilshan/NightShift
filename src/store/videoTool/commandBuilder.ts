@@ -1,4 +1,6 @@
-export function generateFFmpegCommand(opts: VideoSlice): string[] {
+import { VideoSliceType } from "./videoSlice";
+
+export function generateVideoCommand(opts: VideoSliceType): string[] {
   if (!opts.inputFiles?.length) return [];
 
   const args: string[] = ["ffmpeg"];
@@ -82,8 +84,8 @@ export function generateFFmpegCommand(opts: VideoSlice): string[] {
   // ----------------------------
   // WATERMARK (FILTER COMPLEX)
   // ----------------------------
-  if (opts.watermark.file) {
-    args.push("-i", opts.watermark.file.name);
+  if (opts.watermark.filePath) {
+    args.push("-i", opts.watermark.filePath);
 
     args.push(
       "-filter_complex",
