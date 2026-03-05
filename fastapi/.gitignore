@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+.venv/
+venv/
+
+# Environment variables
+.env
+
+# Logs
+*.log
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# FastAPI / Uvicorn
+*.pid
+
+# Temp / uploads
+tmp/
+temp/
+uploads/
+
+# Tool binaries (optional: remove if you WANT to commit them)
+app/tools/**/ffmpeg.exe
+app/tools/**/cwebp.exe
+app/tools/**/dwebp.exe
+
+# Node (future frontend)
+node_modules/
+
+# Tauri build (future)
+src-tauri/target/

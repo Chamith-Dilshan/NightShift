@@ -1,21 +1,43 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { open } from "@tauri-apps/plugin-dialog";
-import { Trash2, UploadCloud } from "lucide-react";
+import { listen } from "@tauri-apps/api/event";
+import { Trash2, UploadCloud, FolderOpen, RotateCcw } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { addInputFiles, removeInputFile } from "@/store/videoTool/videoSlice";
+import {
+  addInputFiles,
+  removeInputFile,
+  removeAllInputFiles,
+  resetInput,
+} from "@/store/videoTool/videoSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+
+// Supported media extensions for filtering
+const MEDIA_EXTENSIONS = [
+  "mp4", "mov", "mkv", "webm", "avi", "flv", "wmv",
+  "mp3", "wav", "aac", "flac", "ogg",
+  "png", "jpg", "jpeg", "gif", "bmp", "tiff",
+];
+
+function isMediaFile(path: string): boolean {
+  const ext = path.split(".").pop()?.toLowerCase() ?? "";
+  return MEDIA_EXTENSIONS.includes(ext);
+}
+
+function basename(path: string): string {
+  return path.replace(/\\/g, "/").split("/").pop() ?? path;
+}
 
 export default function InputPanel() {
   const dispatch = useAppDispatch();
   const inputFiles = useAppSelector((state) => state.videoTool.inputFiles);
 
   /* ===============================
-     TAURI FILE PICKER
+     TAURI V2 FILE PICKER
   =============================== */
   const pickFiles = async () => {
     const selected = await open({
@@ -23,92 +45,151 @@ export default function InputPanel() {
       filters: [
         {
           name: "Media Files",
-          extensions: ["mp4", "mov", "mkv", "webm", "mp3", "wav", "png", "jpg"],
+          extensions: MEDIA_EXTENSIONS,
         },
       ],
     });
 
     if (!selected) return;
-
-    const files = Array.isArray(selected) ? selected : [selected];
-
-    dispatch(addInputFiles(files));
+    const filePaths = Array.isArray(selected) ? selected : [selected];
+    dispatch(addInputFiles(filePaths));
   };
 
   /* ===============================
-     DRAG & DROP SUPPORT
+     TAURI V2 DRAG & DROP
+     Uses native window events (real OS paths, not blob URLs)
+     Requires Rust: lib.rs forwards WindowEvent::DragDrop → "file-drop"
   =============================== */
-  const onDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
 
-      const files = Array.from(e.dataTransfer.files).map((f) => f.name);
+    listen<string[]>("file-drop", (event) => {
+      const mediaFiles = event.payload.filter(isMediaFile);
+      if (mediaFiles.length > 0) {
+        dispatch(addInputFiles(mediaFiles));
+      }
+    }).then((fn) => {
+      unlisten = fn;
+    });
 
-      dispatch(addInputFiles(files));
-    },
-    [dispatch],
-  );
+    return () => {
+      unlisten?.();
+    };
+  }, [dispatch]);
+
+  /* ===============================
+     DRAG-OVER VISUAL
+  =============================== */
+  const dropZoneRef = useRef<HTMLDivElement>(null);
+
+  const onDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    dropZoneRef.current?.classList.add("border-primary");
+  }, []);
+
+  const onDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    dropZoneRef.current?.classList.remove("border-primary");
+  }, []);
+
+  const onDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+
+  // Visual-only drop (actual paths come via Tauri event)
+  const onDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    dropZoneRef.current?.classList.remove("border-primary");
+  }, []);
 
   return (
     <div className="space-y-4">
       {/* Title */}
-      <div>
-        <h2 className="text-lg font-semibold">📂 Input Files</h2>
-        <p className="text-sm text-muted-foreground">
-          Add videos, audio, or images to process with FFmpeg.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">📂 Input Files</h2>
+          <p className="text-sm text-muted-foreground">
+            Add videos, audio, or images. Drag & drop or use the file browser.
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 text-xs text-muted-foreground hover:text-foreground"
+          onClick={() => dispatch(resetInput())}
+          title="Reset Input"
+        >
+          <RotateCcw className="w-3.5 h-3.5 mr-1" />
+          Reset
+        </Button>
       </div>
 
       {/* Drop Zone */}
       <Card
+        ref={dropZoneRef}
         onClick={pickFiles}
+        onDragEnter={onDragEnter}
+        onDragLeave={onDragLeave}
+        onDragOver={onDragOver}
         onDrop={onDrop}
-        onDragOver={(e) => e.preventDefault()}
         className="
-          p-8 rounded-2xl border
+          p-8 rounded-2xl border-2 border-dashed
           flex flex-col items-center justify-center gap-3
-          cursor-pointer
-          hover:border-brand-500-dark hover:dark:border-brand-500
-          transition
+          cursor-pointer select-none
+          transition-colors duration-150
+          hover:border-primary
         "
       >
         <UploadCloud className="w-10 h-10 text-muted-foreground" />
-
-        <p className="text-sm text-center text-muted-foreground">
-          Drag & drop files here, or click to browse (Tauri picker)
-        </p>
-
-        <Button className="w-full max-w-xs rounded-xl">Browse Files</Button>
+        <div className="text-center">
+          <p className="text-sm font-medium">Drag & drop files here</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            or click to browse — mp4, mov, mkv, mp3, wav, png, jpg…
+          </p>
+        </div>
+        <Button size="sm" className="rounded-xl mt-1" onClick={(e) => { e.stopPropagation(); pickFiles(); }}>
+          <FolderOpen className="w-4 h-4 mr-2" />
+          Browse Files
+        </Button>
       </Card>
 
       {/* File List */}
       {inputFiles.length > 0 && (
         <Card className="p-4 rounded-2xl border space-y-3">
-          <h3 className="text-sm font-semibold">
-            Selected Files ({inputFiles.length})
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold">
+              Selected Files ({inputFiles.length})
+            </h3>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-xs text-muted-foreground hover:text-destructive h-auto py-1"
+              onClick={() => dispatch(removeAllInputFiles())}
+            >
+              Clear All
+            </Button>
+          </div>
 
-          <div className="space-y-2 max-h-48 overflow-y-auto scrollbar-thin">
+          <div className="space-y-2 max-h-52 overflow-y-auto pr-1" style={{ scrollbarWidth: "thin" }}>
             {inputFiles.map((file: string) => (
               <div
                 key={file}
                 className="
                   flex items-center justify-between
                   px-3 py-2 rounded-xl
-                  bg-muted text-sm
+                  bg-muted text-sm gap-2
                 "
               >
-                <span className="truncate">{file}</span>
+                <div className="flex flex-col min-w-0">
+                  <span className="truncate font-medium text-xs">{basename(file)}</span>
+                  <span className="truncate text-xs text-muted-foreground">{file}</span>
+                </div>
 
                 <button
                   onClick={() => dispatch(removeInputFile(file))}
-                  className="
-                    text-muted-foreground
-                    hover:text-red-500
-                    transition
-                  "
+                  className="shrink-0 text-muted-foreground hover:text-destructive transition"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={14} />
                 </button>
               </div>
             ))}
