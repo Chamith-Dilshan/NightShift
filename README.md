@@ -40,6 +40,19 @@ NightShift employs a cutting-edge triple-stack architecture for maximum performa
 - Rust & Cargo (`rustc`, Cargo)
 - Python 3.13+ & `uv` or `pip`
 
+For this project, I'm using uv for managing python, package, and virtual environment. So it is a little bit different from pip.
+As a good practice, I recommend keeping all the python-related code inside the "fastapi" folder. So first, make sure you have uv installed.
+Then through uv, install paython and check if it installed correctly. Then go to the fastapi folder and create a virtual environment.
+Then you can install the requirements.txt and run the app.main:app.
+
+```bash
+cd fastapi
+uv create .venv
+uv activate .venv
+uv sync
+uvicorn app.main:app --reload --port 8000
+```
+
 ### 1. Start the FastAPI Sidecar
 The sidecar must be running to process media commands.
 ```bash
@@ -53,8 +66,9 @@ uvicorn app.main:app --reload --port 8000
 ### 2. Start the Tauri App (Frontend + Rust)
 In a separate terminal, run the main UI.
 ```bash
-npm install
-npm run tauri dev
+pnpm update
+pnpm install
+pnpm run tauri dev
 ```
 
 ---
