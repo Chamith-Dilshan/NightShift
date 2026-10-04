@@ -48,7 +48,7 @@ Then you can install the requirements.txt and run the app.main:app.
 ```bash
 cd fastapi
 uv create .venv
-uv activate .venv
+.venv\Scripts\activate
 uv sync
 uvicorn app.main:app --reload --port 8000
 ```
