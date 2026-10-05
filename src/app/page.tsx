@@ -18,6 +18,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ComingSoon } from "@/components/ComingSoon";
 import {AnimatedThemeToggler} from "@/components/ui/animated-theme-toggler";
+import Image from "next/image";
 
 export default function HomePage() {
   const dispatch = useAppDispatch();
@@ -36,7 +37,7 @@ export default function HomePage() {
       <header className="border-b border-border px-8 py-4 flex items-center justify-between bg-background backdrop-blur-md">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-mono font-bold text-sm shadow-md shadow-primary/10">
-            NS
+            <Image src="/app-icon.png" alt="NightShift-logo" width={30} height={30} className="object-cover"/>
           </div>
           <div>
             <h1 className="font-bold text-sm tracking-wide text-foreground">

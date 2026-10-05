@@ -2,6 +2,9 @@
 # IDE
 .idea
 
+# virtual environment
+.venv
+
 # dependencies
 /node_modules
 /.pnp
