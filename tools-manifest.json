@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "tools": {
+    "ffmpeg": {
+      "version": "7.1",
+      "license": "GPL-3.0",
+      "platforms": {
+        "windows-x86_64": {
+          "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip",
+          "sha256": "",
+          "archive": "zip",
+          "files": {
+            "ffmpeg": "bin/ffmpeg.exe",
+            "ffprobe": "bin/ffprobe.exe"
+          }
+        },
+        "linux-x86_64": {
+          "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz",
+          "sha256": "",
+          "archive": "tar.xz",
+          "files": {
+            "ffmpeg": "bin/ffmpeg",
+            "ffprobe": "bin/ffprobe"
+          }
+        },
+        "linux-aarch64": {
+          "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linuxarm64-gpl.tar.xz",
+          "sha256": "",
+          "archive": "tar.xz",
+          "files": {
+            "ffmpeg": "bin/ffmpeg",
+            "ffprobe": "bin/ffprobe"
+          }
+        },
+        "macos-aarch64": {
+          "url": "https://evermeet.cx/ffmpeg/getrelease/zip",
+          "sha256": "",
+          "archive": "zip",
+          "files": {
+            "ffmpeg": "ffmpeg",
+            "ffprobe": "ffprobe"
+          }
+        },
+        "macos-x86_64": {
+          "url": "https://evermeet.cx/ffmpeg/getrelease/zip",
+          "sha256": "",
+          "archive": "zip",
+          "files": {
+            "ffmpeg": "ffmpeg",
+            "ffprobe": "ffprobe"
+          }
+        }
+      }
+    }
+  }
+}
