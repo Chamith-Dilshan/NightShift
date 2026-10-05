@@ -1,170 +1,299 @@
-/**
- * @file commandBuilder.ts
- * @description Generates the FFmpeg command line arguments from the Redux state.
- * This file handles all the complex logic of mapping UI state into a valid
- * FFmpeg array of arguments, including handling codec constraints, complex filter
- * graphs (e.g., combining watermarks and GIF palette generation), and proper
- * flag application based on the selected output format.
- */
+import { VideoSettings, ProbeSummary } from "./types";
+import { resolveVideoCodec, resolveAudioCodec } from "./codecRules";
 
-import { VideoSliceState } from "./videoSlice";
+export interface CommandIO {
+  input: string;
+  output: string;
+  probe?: ProbeSummary;
+}
 
-/**
- * Generates an array of FFmpeg arguments based on the user's selected options in the Redux store.
- * 
- * @param opts - The current VideoSliceState containing all user selections.
- * @returns {string[]} An array of command line arguments ready to be passed to a spawned FFmpeg process.
- */
-export function generateVideoCommand(opts: VideoSliceState): string[] {
-  if (!opts.inputFiles?.length) return [];
-
+export function generateVideoCommand(settings: VideoSettings, io: CommandIO): string[] {
   const args: string[] = ["ffmpeg"];
 
-  // ----------------------------
-  // INPUT FILES
-  // ----------------------------
-  for (const inputFile of opts.inputFiles) {
-    args.push("-i", inputFile);
-  }
-
-  // ----------------------------
-  // VIDEO SETTINGS
-  // ----------------------------
-  if (opts.video.enabled) {
-    if (opts.video.codec) {
-      args.push("-c:v", opts.video.codec);
-    }
-
-    // Only use CRF if no bitrate override and codec supports it
-    if (!opts.video.bitrate && opts.video.crf !== undefined) {
-      args.push("-crf", String(opts.video.crf));
-    }
-
-    // Presets are generally only for x264/x265 encoding, skip for copy
-    if (opts.video.preset && opts.video.codec !== "copy") {
-      args.push("-preset", opts.video.preset);
-    }
-
-    if (opts.video.bitrate) {
-      args.push("-b:v", opts.video.bitrate);
-    }
-
-    // FPS Override
-    if (opts.video.fps && opts.video.fps > 0) {
-      args.push("-r", String(opts.video.fps));
-    }
+  // 1. Collision flag: exactly one of -n (suffix mode) or -y (overwrite mode)
+  if (settings.output.collision === "overwrite") {
+    args.push("-y");
   } else {
-    args.push("-vn"); // Disable video globally
+    args.push("-n");
   }
 
-  // ----------------------------
-  // AUDIO SETTINGS
-  // ----------------------------
-  // GIFs cannot contain audio tracks. We explicitly force -an if the format is gif.
-  if (opts.audio.enabled && opts.format !== "gif") {
-    if (opts.audio.codec) {
-      args.push("-c:a", opts.audio.codec);
+  // 2. Input options: trim before -i
+  if (settings.trim.enabled) {
+    args.push("-ss", settings.trim.start, "-to", settings.trim.end);
+  }
+
+  // 3. Main input file
+  args.push("-i", io.input);
+
+  // 4. Watermark input file
+  const hasWatermark =
+    settings.watermark.enabled && !!settings.watermark.filePath;
+  if (hasWatermark && settings.watermark.filePath) {
+    args.push("-i", settings.watermark.filePath);
+  }
+
+  const isGif = settings.output.format === "gif";
+  const resolvedVideo = resolveVideoCodec(
+    settings.output.format,
+    settings.video.codec
+  ).codec;
+
+  // 5. Build filter chains
+  const simpleFilters: string[] = [];
+
+  // If copy mode, no filters allowed per V4
+  if (resolvedVideo !== "copy") {
+    // crop -> transpose (rotate) -> hflip -> vflip -> scale -> hue=s=0 -> eq -> gblur -> unsharp
+    if (settings.crop.enabled) {
+      if (settings.crop.x != null && settings.crop.y != null) {
+        simpleFilters.push(
+          `crop=${settings.crop.width}:${settings.crop.height}:${settings.crop.x}:${settings.crop.y}`
+        );
+      } else {
+        simpleFilters.push(`crop=${settings.crop.width}:${settings.crop.height}`);
+      }
     }
-    if (opts.audio.bitrate && opts.audio.codec !== "copy") {
-      args.push("-b:a", opts.audio.bitrate);
+
+    if (settings.transforms.rotate === 90) {
+      simpleFilters.push("transpose=1");
+    } else if (settings.transforms.rotate === -90) {
+      simpleFilters.push("transpose=2");
+    } else if (settings.transforms.rotate === 180) {
+      simpleFilters.push("transpose=1,transpose=1");
     }
-    if (opts.audio.channels) {
-      args.push("-ac", String(opts.audio.channels));
+
+    if (settings.transforms.flipHorizontal) {
+      simpleFilters.push("hflip");
     }
-  } else {
-    args.push("-an"); // Disable audio
+
+    if (settings.transforms.flipVertical) {
+      simpleFilters.push("vflip");
+    }
+
+    if (settings.video.resolutionHeight != null) {
+      simpleFilters.push(`scale=-2:${settings.video.resolutionHeight}`);
+    }
+
+    if (settings.filters.grayscale) {
+      simpleFilters.push("hue=s=0");
+    }
+
+    if (settings.filters.saturation !== 1) {
+      simpleFilters.push(`eq=saturation=${settings.filters.saturation}`);
+    }
+
+    if (settings.filters.blur > 0) {
+      simpleFilters.push(`gblur=sigma=${settings.filters.blur}`);
+    }
+
+    if (settings.filters.sharpen > 0) {
+      simpleFilters.push(`unsharp=5:5:${settings.filters.sharpen}`);
+    }
   }
 
-  // ----------------------------
-  // BUILD STANDARD FILTER CHAIN (-vf)
-  // ----------------------------
-  const vfFilters: string[] = [];
+  const gifTail = `fps=${settings.gif.fps},scale=${settings.gif.width}:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse=dither=${settings.gif.dither}`;
 
-  // Resolution scaling (skip if undefined or set to the custom 'original' enum)
-  if (opts.video.resolution && opts.video.resolution !== "original") {
-    vfFilters.push(`scale=${opts.video.resolution}`);
-  }
+  // 6. Assemble filter args and stream mapping
+  if (hasWatermark) {
+    const wmOpacity = settings.watermark.opacity;
+    const wmChain =
+      wmOpacity === 1
+        ? "[1:v]"
+        : `[1:v]format=rgba,colorchannelmixer=aa=${wmOpacity}[wm];`;
 
-  // Grayscale mapping
-  if (opts.filters.grayscale) {
-    vfFilters.push("hue=s=0");
-  }
+    const wmLabel = wmOpacity === 1 ? "[1:v]" : "[wm]";
 
-  // Gaussian Blur
-  if (opts.filters.blur > 0) {
-    vfFilters.push(`gblur=sigma=${opts.filters.blur}`);
-  }
+    const simpleChainStr =
+      simpleFilters.length > 0 ? simpleFilters.join(",") : "null";
+    const baseGraph = `[0:v]${simpleChainStr}[base];`;
 
-  // Unsharp mask (Sharpening)
-  if (opts.filters.sharpen > 0) {
-    vfFilters.push(`unsharp=5:5:${opts.filters.sharpen}`);
-  }
+    const m = settings.watermark.margin;
+    let overlayX = "W-w-m";
+    let overlayY = "H-h-m";
 
-  // Color Saturation (only apply if value differs from the default 1.0 baseline)
-  if (Math.abs(opts.filters.saturation - 1) > 0.05) {
-    vfFilters.push(`eq=saturation=${opts.filters.saturation}`);
-  }
+    switch (settings.watermark.anchor) {
+      case "tl":
+        overlayX = `${m}`;
+        overlayY = `${m}`;
+        break;
+      case "tc":
+        overlayX = "(W-w)/2";
+        overlayY = `${m}`;
+        break;
+      case "tr":
+        overlayX = `W-w-${m}`;
+        overlayY = `${m}`;
+        break;
+      case "ml":
+        overlayX = `${m}`;
+        overlayY = "(H-h)/2";
+        break;
+      case "mc":
+        overlayX = "(W-w)/2";
+        overlayY = "(H-h)/2";
+        break;
+      case "mr":
+        overlayX = `W-w-${m}`;
+        overlayY = "(H-h)/2";
+        break;
+      case "bl":
+        overlayX = `${m}`;
+        overlayY = `H-h-${m}`;
+        break;
+      case "bc":
+        overlayX = "(W-w)/2";
+        overlayY = `H-h-${m}`;
+        break;
+      case "br":
+        overlayX = `W-w-${m}`;
+        overlayY = `H-h-${m}`;
+        break;
+    }
 
-  // Rotation via transpose
-  if (opts.transforms.rotate === 90) {
-    vfFilters.push("transpose=1");
-  } else if (opts.transforms.rotate === -90) {
-    vfFilters.push("transpose=2");
-  } else if (opts.transforms.rotate === 180) {
-    // 180 degree rotation requires two consecutive 90 degree transposes.
-    vfFilters.push("transpose=2,transpose=2");
-  }
-
-  // Flips
-  if (opts.transforms.flipHorizontal) vfFilters.push("hflip");
-  if (opts.transforms.flipVertical) vfFilters.push("vflip");
-
-  // ----------------------------
-  // WATERMARK AND FILTER COMPLEX
-  // ----------------------------
-  // FFmpeg only allows EITHER -vf OR -filter_complex.
-  // We must merge our basic `vfFilters` into the complex graph if a watermark is used.
-  // Outputting high-quality GIFs also requires a complex graph (palettegen + paletteuse).
-
-  if (opts.watermark.filePath) {
-    // Load watermark image as 2nd input stream
-    args.push("-i", opts.watermark.filePath);
-
-    // Process opacity
-    const alphaStr = opts.watermark.opacity < 1
-      ? `,format=rgba,colorchannelmixer=aa=${opts.watermark.opacity}`
-      : "";
-
-    // Build the merged complex graph
-    if (opts.format === "gif") {
-      // 1. apply basic filters, 2. overlay watermark, 3. generate & apply GIF palette
-      const preFilter = vfFilters.length > 0 ? `[0:v]${vfFilters.join(",")}[v0];[v0]` : `[0:v]`;
-      args.push("-filter_complex", `${preFilter}[1:v]overlay=${opts.watermark.position}${alphaStr}[x];[x]split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse`);
+    let filterComplex = "";
+    if (wmOpacity === 1) {
+      filterComplex = `${baseGraph}[base]${wmLabel}overlay=${overlayX}:${overlayY}`;
     } else {
-      // Standard MP4/WebM watermark overlay
-      const preFilter = vfFilters.length > 0 ? `[0:v]${vfFilters.join(",")}[v0];[v0]` : `[0:v]`;
-      args.push("-filter_complex", `${preFilter}[1:v]overlay=${opts.watermark.position}${alphaStr}`);
+      filterComplex = `${wmChain}${baseGraph}[base]${wmLabel}overlay=${overlayX}:${overlayY}`;
     }
-  } else {
-    // No watermark scenario
-    if (opts.format === "gif") {
-      // Standalone high-quality GIF generation
-      const preFilter = vfFilters.length > 0 ? `[0:v]${vfFilters.join(",")}[x];[x]` : `[0:v]`;
-      args.push("-filter_complex", `${preFilter}split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse`);
-    } else if (vfFilters.length > 0) {
-      // Standard -vf graph for basic video formatting without watermark
-      args.push("-vf", vfFilters.join(","));
+
+    if (isGif) {
+      filterComplex += `[vwm];[vwm]${gifTail}[vout]`;
+    } else {
+      filterComplex += "[vout]";
+    }
+
+    args.push("-filter_complex", filterComplex);
+    args.push("-map", "[vout]");
+
+    if (settings.audio.enabled && !isGif) {
+      args.push("-map", "0:a:0?");
+    }
+  } else if (isGif) {
+    if (simpleFilters.length > 0) {
+      args.push("-vf", `${simpleFilters.join(",")},${gifTail}`);
+    } else {
+      args.push("-vf", gifTail);
+    }
+  } else if (simpleFilters.length > 0) {
+    args.push("-vf", simpleFilters.join(","));
+  }
+
+  // 7. Video codec options
+  if (!isGif) {
+    if (!settings.video.enabled) {
+      args.push("-vn");
+    } else if (resolvedVideo === "copy") {
+      args.push("-c:v", "copy");
+    } else {
+      args.push("-c:v", resolvedVideo);
+
+      if (resolvedVideo === "libx264" || resolvedVideo === "libx265") {
+        args.push("-preset", settings.video.preset);
+      }
+
+      if (settings.video.rateControl === "crf") {
+        args.push("-crf", settings.video.crf.toString());
+        if (
+          resolvedVideo === "libvpx-vp9" ||
+          resolvedVideo === "libaom-av1"
+        ) {
+          args.push("-b:v", "0");
+        }
+      } else {
+        args.push("-b:v", settings.video.bitrate);
+      }
+
+      if (resolvedVideo === "libvpx-vp9") {
+        args.push(
+          "-cpu-used",
+          settings.video.cpuUsed.toString(),
+          "-deadline",
+          "good",
+          "-row-mt",
+          "1"
+        );
+      } else if (resolvedVideo === "libaom-av1") {
+        args.push(
+          "-cpu-used",
+          settings.video.cpuUsed.toString(),
+          "-row-mt",
+          "1"
+        );
+      }
+
+      if (settings.video.webOptimized) {
+        args.push("-pix_fmt", "yuv420p");
+        if (
+          resolvedVideo === "libx265" &&
+          settings.output.format === "mp4"
+        ) {
+          args.push("-tag:v", "hvc1");
+        }
+      }
+
+      if (settings.video.fps != null) {
+        args.push("-r", settings.video.fps.toString());
+      }
+
+      if (settings.video.keyframe.enabled) {
+        const interval = settings.video.keyframe.interval;
+        if (resolvedVideo === "libx264") {
+          args.push(
+            "-g",
+            interval.toString(),
+            "-keyint_min",
+            interval.toString(),
+            "-sc_threshold",
+            "0"
+          );
+        } else if (resolvedVideo === "libx265") {
+          args.push(
+            "-x265-params",
+            `keyint=${interval}:min-keyint=${interval}:scenecut=0`
+          );
+        } else if (
+          resolvedVideo === "libvpx-vp9" ||
+          resolvedVideo === "libaom-av1"
+        ) {
+          args.push("-g", interval.toString(), "-keyint_min", interval.toString());
+        }
+      }
     }
   }
 
-  // ----------------------------
-  // OUTPUT
-  // ----------------------------
-  const ext = opts.format === "custom" ? "" : `.${opts.format}`;
-  const outputDir = opts.outputDir
-    ? `${opts.outputDir}/${opts.outputName}${ext}`
-    : `${opts.outputName}${ext}`;
-  args.push(outputDir);
+  // 8. Audio options
+  if (isGif || !settings.audio.enabled) {
+    args.push("-an");
+  } else {
+    const resolvedAudio = resolveAudioCodec(
+      settings.output.format,
+      settings.audio.codec
+    ).codec;
+
+    if (resolvedAudio === "copy") {
+      args.push("-c:a", "copy");
+    } else {
+      args.push("-c:a", resolvedAudio);
+      if (resolvedAudio !== "flac") {
+        args.push("-b:a", settings.audio.bitrate);
+      }
+      args.push("-ac", settings.audio.channels.toString());
+    }
+  }
+
+  // 9. Container flags
+  if (settings.output.format === "mp4" && settings.video.webOptimized) {
+    args.push("-movflags", "+faststart");
+  } else if (isGif) {
+    args.push("-loop", settings.gif.loop.toString());
+  }
+
+  // 10. Stream hygiene
+  args.push("-sn", "-dn");
+
+  // 11. Output path
+  args.push(io.output);
 
   return args;
 }

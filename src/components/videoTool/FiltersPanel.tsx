@@ -1,162 +1,127 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { Sparkles, RotateCcw } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { selectVideoSettings } from "@/store/videoTool/selectors";
+import { updateFiltersSettings } from "@/store/videoTool/videoSlice";
+import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import {
-  setGrayscale,
-  setBlur,
-  setSharpen,
-  setSaturation,
-  resetFilters,
-} from "@/store/videoTool/videoSlice";
-import { RotateCcw } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-
-interface SliderRowProps {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  onChange: (v: number) => void;
-  leftLabel?: string;
-  rightLabel?: string;
-  formatValue?: (v: number) => string;
-}
-
-function SliderRow({
-  label,
-  value,
-  min,
-  max,
-  step,
-  onChange,
-  leftLabel,
-  rightLabel,
-  formatValue,
-}: SliderRowProps) {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium">{label}</span>
-        <span className="text-sm font-mono bg-muted px-2 py-0.5 rounded-lg">
-          {formatValue ? formatValue(value) : value}
-        </span>
-      </div>
-      <Slider
-        min={min}
-        max={max}
-        step={step}
-        value={[value]}
-        onValueChange={([v]) => onChange(v)}
-        className="w-full"
-      />
-      {(leftLabel || rightLabel) && (
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{leftLabel}</span>
-          <span>{rightLabel}</span>
-        </div>
-      )}
-    </div>
-  );
-}
+import { Button } from "@/components/ui/button";
 
 export default function FiltersPanel() {
   const dispatch = useAppDispatch();
-  const filters = useAppSelector((s) => s.videoTool.filters);
+  const settings = useAppSelector(selectVideoSettings);
+  const filters = settings.filters;
+
+  const hasActiveFilters =
+    filters.grayscale ||
+    filters.blur > 0 ||
+    filters.sharpen > 0 ||
+    filters.saturation !== 1;
+
+  const handleReset = () => {
+    dispatch(
+      updateFiltersSettings({
+        grayscale: false,
+        blur: 0,
+        sharpen: 0,
+        saturation: 1,
+      })
+    );
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between">
-        <div>
-          <h2 className="text-lg font-semibold">✨ Filters</h2>
-          <p className="text-sm text-muted-foreground">
-            Apply visual filters — mapped to FFmpeg&apos;s{" "}
-            <code className="text-xs bg-muted px-1 rounded">-vf</code> filter chain.
-          </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-primary" />
+          <Label className="text-sm font-semibold text-zinc-200">
+            Visual Filters
+          </Label>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
-          onClick={() => dispatch(resetFilters())}
-          title="Reset Filters"
-        >
-          <RotateCcw className="w-3.5 h-3.5 mr-1" />
-          Reset
-        </Button>
+        {hasActiveFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleReset}
+            className="h-6 px-1.5 text-[10px] text-zinc-500 hover:text-zinc-300 font-mono"
+          >
+            <RotateCcw className="w-3 h-3 mr-1" /> Reset
+          </Button>
+        )}
       </div>
 
-      {/* Grayscale */}
-      <Card className="p-4 rounded-2xl border">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold">Grayscale</p>
-            <p className="text-xs text-muted-foreground">
-              Removes all color — uses{" "}
-              <code className="bg-muted px-1 rounded">hue=s=0</code>
-            </p>
-          </div>
+      <div className="space-y-4 font-mono text-xs">
+        {/* Grayscale Toggle */}
+        <div className="flex items-center justify-between p-2.5 bg-zinc-900/60 border border-zinc-800 rounded-lg">
+          <Label className="text-xs text-zinc-300 font-medium">Grayscale (B&W)</Label>
           <Switch
             checked={filters.grayscale}
-            onCheckedChange={(v) => dispatch(setGrayscale(v))}
+            onCheckedChange={(grayscale) =>
+              dispatch(updateFiltersSettings({ grayscale }))
+            }
           />
         </div>
-      </Card>
 
-      {/* Blur */}
-      <Card className="p-4 rounded-2xl border space-y-3">
-        <p className="text-xs text-muted-foreground font-mono">
-          gblur=sigma={filters.blur === 0 ? "(disabled)" : filters.blur}
-        </p>
-        <SliderRow
-          label="Gaussian Blur"
-          value={filters.blur}
-          min={0}
-          max={20}
-          step={0.5}
-          onChange={(v) => dispatch(setBlur(v))}
-          leftLabel="0 — Off"
-          rightLabel="20 — Heavy"
-        />
-      </Card>
+        {/* Saturation Slider */}
+        <div className="space-y-1.5 p-3 bg-zinc-900/40 border border-zinc-800/80 rounded-lg">
+          <div className="flex items-center justify-between text-zinc-300">
+            <span className="text-[11px] text-zinc-400">Color Saturation</span>
+            <span className="text-primary font-bold">{filters.saturation.toFixed(1)}x</span>
+          </div>
+          <Slider
+            value={[filters.saturation]}
+            min={0}
+            max={3}
+            step={0.1}
+            onValueChange={(val) => {
+              const n = Array.isArray(val) ? val[0] : Number(val);
+              dispatch(updateFiltersSettings({ saturation: n }));
+            }}
+            className="py-1"
+          />
+        </div>
 
-      {/* Sharpen */}
-      <Card className="p-4 rounded-2xl border space-y-3">
-        <p className="text-xs text-muted-foreground font-mono">
-          unsharp=5:5:{filters.sharpen === 0 ? "(disabled)" : filters.sharpen}
-        </p>
-        <SliderRow
-          label="Sharpen"
-          value={filters.sharpen}
-          min={0}
-          max={10}
-          step={0.5}
-          onChange={(v) => dispatch(setSharpen(v))}
-          leftLabel="0 — Off"
-          rightLabel="10 — Max"
-        />
-      </Card>
+        {/* Blur Slider */}
+        <div className="space-y-1.5 p-3 bg-zinc-900/40 border border-zinc-800/80 rounded-lg">
+          <div className="flex items-center justify-between text-zinc-300">
+            <span className="text-[11px] text-zinc-400">Gaussian Blur (sigma)</span>
+            <span className="text-primary font-bold">{filters.blur}</span>
+          </div>
+          <Slider
+            value={[filters.blur]}
+            min={0}
+            max={20}
+            step={1}
+            onValueChange={(val) => {
+              const n = Array.isArray(val) ? val[0] : Number(val);
+              dispatch(updateFiltersSettings({ blur: n }));
+            }}
+            className="py-1"
+          />
+        </div>
 
-      {/* Saturation */}
-      <Card className="p-4 rounded-2xl border space-y-3">
-        <p className="text-xs text-muted-foreground font-mono">
-          eq=saturation={filters.saturation}
-        </p>
-        <SliderRow
-          label="Saturation"
-          value={filters.saturation}
-          min={0}
-          max={3}
-          step={0.1}
-          onChange={(v) => dispatch(setSaturation(Math.round(v * 10) / 10))}
-          leftLabel="0 — Grayscale"
-          rightLabel="3 — Vivid"
-          formatValue={(v) => v.toFixed(1)}
-        />
-      </Card>
+        {/* Sharpen Slider */}
+        <div className="space-y-1.5 p-3 bg-zinc-900/40 border border-zinc-800/80 rounded-lg">
+          <div className="flex items-center justify-between text-zinc-300">
+            <span className="text-[11px] text-zinc-400">Unsharp / Sharpen</span>
+            <span className="text-primary font-bold">{filters.sharpen.toFixed(1)}</span>
+          </div>
+          <Slider
+            value={[filters.sharpen]}
+            min={0}
+            max={5}
+            step={0.5}
+            onValueChange={(val) => {
+              const n = Array.isArray(val) ? val[0] : Number(val);
+              dispatch(updateFiltersSettings({ sharpen: n }));
+            }}
+            className="py-1"
+          />
+        </div>
+      </div>
     </div>
   );
 }

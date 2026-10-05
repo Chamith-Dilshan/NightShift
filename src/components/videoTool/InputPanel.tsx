@@ -1,26 +1,24 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-
-import { open } from "@tauri-apps/plugin-dialog";
-import { listen } from "@tauri-apps/api/event";
-import { Trash2, UploadCloud, FolderOpen, RotateCcw } from "lucide-react";
-
-import { Card } from "@/components/ui/card";
+import { Trash2, UploadCloud, RotateCcw, Video, FileAudio, Clock, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   addInputFiles,
   removeInputFile,
-  removeAllInputFiles,
-  resetInput,
+  clearInputFiles,
+  setProbe,
 } from "@/store/videoTool/videoSlice";
+import { selectVideoState } from "@/store/videoTool/selectors";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { getExecutor, ProbeResult } from "@/lib/executor";
+import { isTauri } from "@/lib/isTauri";
+import { ProbeSummary } from "@/store/videoTool/types";
 
-// Supported media extensions for filtering
 const MEDIA_EXTENSIONS = [
-  "mp4", "mov", "mkv", "webm", "avi", "flv", "wmv",
-  "mp3", "wav", "aac", "flac", "ogg",
-  "png", "jpg", "jpeg", "gif", "bmp", "tiff",
+  "mp4", "mov", "mkv", "webm", "avi", "flv", "wmv", "m4v",
+  "mp3", "wav", "aac", "flac", "ogg", "m4a",
+  "png", "jpg", "jpeg", "gif", "bmp", "tiff", "webp",
 ];
 
 function isMediaFile(path: string): boolean {
@@ -32,169 +30,222 @@ function basename(path: string): string {
   return path.replace(/\\/g, "/").split("/").pop() ?? path;
 }
 
+function parseFraction(str: string): number | null {
+  if (!str) return null;
+  if (str.includes("/")) {
+    const [num, den] = str.split("/").map(Number);
+    if (!isNaN(num) && !isNaN(den) && den !== 0) {
+      return num / den;
+    }
+  }
+  const n = parseFloat(str);
+  return isNaN(n) ? null : n;
+}
+
+function extractProbeSummary(res: ProbeResult): ProbeSummary {
+  const vStream = res.streams?.find((s) => s.codec_type === "video");
+  const aStream = res.streams?.find((s) => s.codec_type === "audio");
+  const durationSec = res.format?.duration ? parseFloat(res.format.duration) : null;
+  const fps = vStream?.avg_frame_rate ? parseFraction(vStream.avg_frame_rate) : null;
+
+  return {
+    durationMs: durationSec ? Math.round(durationSec * 1000) : null,
+    width: vStream?.width || null,
+    height: vStream?.height || null,
+    fps: fps ? Math.round(fps * 100) / 100 : null,
+    hasAudio: !!aStream,
+    videoCodec: vStream?.codec_name || null,
+    audioCodec: aStream?.codec_name || null,
+  };
+}
+
 export default function InputPanel() {
   const dispatch = useAppDispatch();
-  const inputFiles = useAppSelector((state) => state.videoTool.inputFiles);
+  const { inputFiles, probes } = useAppSelector(selectVideoState);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
-  /* ===============================
-     TAURI V2 FILE PICKER
-  =============================== */
+  const handleProbe = useCallback(
+    async (paths: string[]) => {
+      const executor = getExecutor();
+      for (const p of paths) {
+        try {
+          const res = await executor.probe(p);
+          const summary = extractProbeSummary(res);
+          dispatch(setProbe({ path: p, probe: summary }));
+        } catch (e) {
+          console.warn(`Probe failed for ${p}:`, e);
+        }
+      }
+    },
+    [dispatch]
+  );
+
   const pickFiles = async () => {
-    const selected = await open({
-      multiple: true,
-      filters: [
-        {
-          name: "Media Files",
-          extensions: MEDIA_EXTENSIONS,
-        },
-      ],
-    });
+    if (isTauri()) {
+      try {
+        const { open } = await import("@tauri-apps/plugin-dialog");
+        const selected = await open({
+          multiple: true,
+          filters: [
+            {
+              name: "Media Files",
+              extensions: MEDIA_EXTENSIONS,
+            },
+          ],
+        });
 
-    if (!selected) return;
-    const filePaths = Array.isArray(selected) ? selected : [selected];
-    dispatch(addInputFiles(filePaths));
+        if (!selected) return;
+        const filePaths = Array.isArray(selected) ? selected : [selected];
+        dispatch(addInputFiles(filePaths));
+        handleProbe(filePaths);
+        return;
+      } catch (e) {
+        console.warn("Tauri dialog error:", e);
+      }
+    }
+
+    // Browser mock fallback
+    const mockFiles = [`/mock/videos/sample_${Date.now()}.mp4`];
+    dispatch(addInputFiles(mockFiles));
+    handleProbe(mockFiles);
   };
 
-  /* ===============================
-     TAURI V2 DRAG & DROP
-     Uses native window events (real OS paths, not blob URLs)
-     Requires Rust: lib.rs forwards WindowEvent::DragDrop → "file-drop"
-  =============================== */
   useEffect(() => {
     let unlisten: (() => void) | undefined;
 
-    listen<string[]>("file-drop", (event) => {
-      const mediaFiles = event.payload.filter(isMediaFile);
-      if (mediaFiles.length > 0) {
-        dispatch(addInputFiles(mediaFiles));
-      }
-    }).then((fn) => {
-      unlisten = fn;
-    });
+    if (isTauri()) {
+      import("@tauri-apps/api/webview").then(({ getCurrentWebview }) => {
+        getCurrentWebview()
+          .onDragDropEvent((event) => {
+            if (event.payload.type === "enter" || event.payload.type === "over") {
+              dropZoneRef.current?.classList.add("border-primary", "bg-primary/5");
+            } else if (event.payload.type === "leave") {
+              dropZoneRef.current?.classList.remove("border-primary", "bg-primary/5");
+            } else if (event.payload.type === "drop") {
+              dropZoneRef.current?.classList.remove("border-primary", "bg-primary/5");
+              const mediaFiles = (event.payload.paths || []).filter(isMediaFile);
+              if (mediaFiles.length > 0) {
+                dispatch(addInputFiles(mediaFiles));
+                handleProbe(mediaFiles);
+              }
+            }
+          })
+          .then((fn) => {
+            unlisten = fn;
+          })
+          .catch((e) => console.warn("Failed to attach drag-drop listener:", e));
+      });
+    }
 
     return () => {
       unlisten?.();
     };
-  }, [dispatch]);
-
-  /* ===============================
-     DRAG-OVER VISUAL
-  =============================== */
-  const dropZoneRef = useRef<HTMLDivElement>(null);
-
-  const onDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    dropZoneRef.current?.classList.add("border-primary");
-  }, []);
-
-  const onDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    dropZoneRef.current?.classList.remove("border-primary");
-  }, []);
-
-  const onDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-  }, []);
-
-  // Visual-only drop (actual paths come via Tauri event)
-  const onDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    dropZoneRef.current?.classList.remove("border-primary");
-  }, []);
+  }, [dispatch, handleProbe]);
 
   return (
     <div className="space-y-4">
-      {/* Title */}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-lg font-semibold">📂 Input Files</h2>
-          <p className="text-sm text-muted-foreground">
-            Add videos, audio, or images. Drag & drop or use the file browser.
+          <h2 className="text-base font-semibold text-zinc-200">Source Files</h2>
+          <p className="text-xs text-zinc-400">
+            Drag & drop or select video files to transcode.
           </p>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 text-xs text-muted-foreground hover:text-foreground"
-          onClick={() => dispatch(resetInput())}
-          title="Reset Input"
-        >
-          <RotateCcw className="w-3.5 h-3.5 mr-1" />
-          Reset
-        </Button>
+        {inputFiles.length > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => dispatch(clearInputFiles())}
+            className="text-xs text-zinc-400 hover:text-red-400 h-7 px-2"
+          >
+            <RotateCcw className="w-3.5 h-3.5 mr-1" /> Clear Queue
+          </Button>
+        )}
       </div>
 
-      {/* Drop Zone */}
-      <Card
+      <div
         ref={dropZoneRef}
         onClick={pickFiles}
-        onDragEnter={onDragEnter}
-        onDragLeave={onDragLeave}
-        onDragOver={onDragOver}
-        onDrop={onDrop}
-        className="
-          p-8 rounded-2xl border-2 border-dashed
-          flex flex-col items-center justify-center gap-3
-          cursor-pointer select-none
-          transition-colors duration-150
-          hover:border-primary
-        "
+        className="group relative flex flex-col items-center justify-center p-6 border-2 border-dashed border-zinc-800 rounded-xl hover:border-primary/60 hover:bg-zinc-900/40 cursor-pointer transition-all duration-200"
       >
-        <UploadCloud className="w-10 h-10 text-muted-foreground" />
-        <div className="text-center">
-          <p className="text-sm font-medium">Drag & drop files here</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            or click to browse — mp4, mov, mkv, mp3, wav, png, jpg…
-          </p>
+        <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-primary group-hover:scale-105 transition-all">
+          <UploadCloud className="w-5 h-5" />
         </div>
-        <Button size="sm" className="rounded-xl mt-1" onClick={(e) => { e.stopPropagation(); pickFiles(); }}>
-          <FolderOpen className="w-4 h-4 mr-2" />
-          Browse Files
-        </Button>
-      </Card>
+        <p className="text-xs font-semibold text-zinc-300 mt-2.5">
+          Drop media files here or click to browse
+        </p>
+        <p className="text-[11px] text-zinc-500 mt-0.5 font-mono">
+          Supports MP4, MOV, WebM, MKV, GIF, etc.
+        </p>
+      </div>
 
-      {/* File List */}
       {inputFiles.length > 0 && (
-        <Card className="p-4 rounded-2xl border space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold">
-              Selected Files ({inputFiles.length})
-            </h3>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="text-xs text-muted-foreground hover:text-destructive h-auto py-1"
-              onClick={() => dispatch(removeAllInputFiles())}
-            >
-              Clear All
-            </Button>
+        <div className="space-y-2 font-mono text-xs">
+          <div className="flex items-center justify-between text-[11px] text-zinc-500 px-1">
+            <span>QUEUED FILES ({inputFiles.length})</span>
+            <span>METADATA</span>
           </div>
 
-          <div className="space-y-2 max-h-52 overflow-y-auto pr-1" style={{ scrollbarWidth: "thin" }}>
-            {inputFiles.map((file: string) => (
-              <div
-                key={file}
-                className="
-                  flex items-center justify-between
-                  px-3 py-2 rounded-xl
-                  bg-muted text-sm gap-2
-                "
-              >
-                <div className="flex flex-col min-w-0">
-                  <span className="truncate font-medium text-xs">{basename(file)}</span>
-                  <span className="truncate text-xs text-muted-foreground">{file}</span>
-                </div>
-
-                <button
-                  onClick={() => dispatch(removeInputFile(file))}
-                  className="shrink-0 text-muted-foreground hover:text-destructive transition"
+          <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
+            {inputFiles.map((path, idx) => {
+              const probe = probes[path];
+              return (
+                <div
+                  key={path}
+                  className="flex items-center justify-between p-2.5 bg-zinc-900/60 border border-zinc-800/80 rounded-lg hover:border-zinc-700 transition-colors"
                 >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            ))}
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <Film className="w-4 h-4 text-zinc-400 shrink-0" />
+                    <div className="truncate">
+                      <p className="text-xs font-medium text-zinc-200 truncate">
+                        {basename(path)}
+                      </p>
+                      <p className="text-[10px] text-zinc-500 truncate">{path}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0 ml-3">
+                    {probe ? (
+                      <div className="flex items-center gap-2 text-[10px] text-zinc-400">
+                        {probe.width && probe.height && (
+                          <span className="flex items-center gap-1 bg-zinc-800 px-1.5 py-0.5 rounded">
+                            <Video className="w-3 h-3 text-zinc-400" />
+                            {probe.width}x{probe.height}
+                          </span>
+                        )}
+                        {probe.durationMs != null && (
+                          <span className="flex items-center gap-1 bg-zinc-800 px-1.5 py-0.5 rounded">
+                            <Clock className="w-3 h-3 text-zinc-400" />
+                            {(probe.durationMs / 1000).toFixed(1)}s
+                          </span>
+                        )}
+                        {!probe.hasAudio && (
+                          <span className="flex items-center gap-1 text-amber-400/80 bg-amber-950/40 px-1.5 py-0.5 rounded">
+                            <FileAudio className="w-3 h-3" /> No Audio
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-[10px] text-zinc-500 italic">Probing...</span>
+                    )}
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        dispatch(removeInputFile(idx));
+                      }}
+                      className="h-6 w-6 text-zinc-500 hover:text-red-400 hover:bg-red-950/20"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </Card>
+        </div>
       )}
     </div>
   );
