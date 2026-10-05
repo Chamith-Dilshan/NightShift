@@ -27,7 +27,7 @@ export function CropPanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Crop className="w-4 h-4 text-primary" />
-          <Label className="text-sm font-semibold text-zinc-200">
+          <Label className="text-sm font-semibold text-foreground">
             Crop Canvas
           </Label>
         </div>
@@ -40,10 +40,10 @@ export function CropPanel() {
       </div>
 
       {settings.crop.enabled && (
-        <div className="space-y-3 pt-1 border-t border-zinc-800/60 font-mono text-xs">
+        <div className="space-y-3 pt-1 border-t border-border/60 font-mono text-xs">
           {probe?.width && probe?.height && (
-            <div className="flex items-center gap-1.5 text-zinc-400 text-[11px]">
-              <Maximize2 className="w-3.5 h-3.5 text-zinc-500" />
+            <div className="flex items-center gap-1.5 text-muted-foreground text-[11px]">
+              <Maximize2 className="w-3.5 h-3.5 text-muted-foreground" />
               <span>
                 Source Size: {probe.width} × {probe.height} px
               </span>
@@ -52,7 +52,7 @@ export function CropPanel() {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-[11px] text-zinc-400">Width (px)</Label>
+              <Label className="text-[11px] text-muted-foreground">Width (px)</Label>
               <Input
                 type="number"
                 value={settings.crop.width || ""}
@@ -64,12 +64,12 @@ export function CropPanel() {
                   )
                 }
                 placeholder="1280"
-                className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800"
+                className="h-8 text-xs font-mono bg-muted border-border"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-[11px] text-zinc-400">Height (px)</Label>
+              <Label className="text-[11px] text-muted-foreground">Height (px)</Label>
               <Input
                 type="number"
                 value={settings.crop.height || ""}
@@ -81,14 +81,14 @@ export function CropPanel() {
                   )
                 }
                 placeholder="720"
-                className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800"
+                className="h-8 text-xs font-mono bg-muted border-border"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-[11px] text-zinc-400">
+              <Label className="text-[11px] text-muted-foreground">
                 X Offset (Empty = Center)
               </Label>
               <Input
@@ -102,12 +102,12 @@ export function CropPanel() {
                   )
                 }
                 placeholder="Auto (Centered)"
-                className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800"
+                className="h-8 text-xs font-mono bg-muted border-border"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-[11px] text-zinc-400">
+              <Label className="text-[11px] text-muted-foreground">
                 Y Offset (Empty = Center)
               </Label>
               <Input
@@ -121,7 +121,7 @@ export function CropPanel() {
                   )
                 }
                 placeholder="Auto (Centered)"
-                className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800"
+                className="h-8 text-xs font-mono bg-muted border-border"
               />
             </div>
           </div>

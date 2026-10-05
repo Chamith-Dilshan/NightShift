@@ -46,8 +46,8 @@ export default function OutputPanel() {
     <div className="space-y-5">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-base font-semibold text-zinc-200">Output Configuration</h2>
-          <p className="text-xs text-zinc-400">
+          <h2 className="text-base font-semibold text-foreground">Output Configuration</h2>
+          <p className="text-xs text-muted-foreground">
             Define container formats, destination directories, and naming patterns.
           </p>
         </div>
@@ -55,7 +55,7 @@ export default function OutputPanel() {
 
       {/* Container Format */}
       <div className="space-y-2">
-        <Label className="text-xs font-semibold text-zinc-300">Container Format</Label>
+        <Label className="text-xs font-semibold text-foreground">Container Format</Label>
         <RadioGroup
           value={settings.output.format}
           onValueChange={(val) =>
@@ -75,14 +75,14 @@ export default function OutputPanel() {
               className={`flex flex-col p-2.5 rounded-xl border cursor-pointer font-mono transition-all ${
                 settings.output.format === item.id
                   ? "bg-primary/10 border-primary text-primary"
-                  : "bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                  : "bg-muted/60 border-border text-muted-foreground hover:border-border hover:text-foreground"
               }`}
             >
               <div className="flex items-center justify-between mb-1">
                 <span className="font-semibold text-xs">{item.label}</span>
                 <RadioGroupItem value={item.id} id={`format-${item.id}`} className="sr-only" />
               </div>
-              <span className="text-[10px] text-zinc-500 font-sans">{item.desc}</span>
+              <span className="text-[10px] text-muted-foreground font-sans">{item.desc}</span>
             </Label>
           ))}
         </RadioGroup>
@@ -90,14 +90,14 @@ export default function OutputPanel() {
 
       {settings.output.format === "custom" && (
         <div className="space-y-1.5 font-mono text-xs">
-          <Label className="text-[11px] text-zinc-400">Custom Container Extension</Label>
+          <Label className="text-[11px] text-muted-foreground">Custom Container Extension</Label>
           <Input
             value={settings.output.customExt}
             onChange={(e) =>
               dispatch(updateOutputSettings({ customExt: e.target.value }))
             }
             placeholder="mkv"
-            className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800"
+            className="h-8 text-xs font-mono bg-muted border-border"
           />
         </div>
       )}
@@ -105,13 +105,13 @@ export default function OutputPanel() {
       {/* Destination Folder */}
       <div className="space-y-1.5 font-mono text-xs">
         <div className="flex items-center justify-between">
-          <Label className="text-[11px] text-zinc-400">Destination Directory</Label>
+          <Label className="text-[11px] text-muted-foreground">Destination Directory</Label>
           {settings.output.dir && (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => dispatch(updateOutputSettings({ dir: null }))}
-              className="h-5 px-1.5 text-[10px] text-zinc-500 hover:text-zinc-300"
+              className="h-5 px-1.5 text-[10px] text-muted-foreground hover:text-foreground"
             >
               <RotateCcw className="w-3 h-3 mr-1" /> Reset to source folder
             </Button>
@@ -121,12 +121,12 @@ export default function OutputPanel() {
           <Input
             readOnly
             value={settings.output.dir || "(Same folder as each input file)"}
-            className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800 text-zinc-300"
+            className="h-8 text-xs font-mono bg-muted border-border text-foreground"
           />
           <Button
             size="sm"
             onClick={pickFolder}
-            className="h-8 px-3 text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 shrink-0"
+            className="h-8 px-3 text-xs bg-muted hover:bg-muted-foreground/20 text-foreground shrink-0"
           >
             <FolderOpen className="w-3.5 h-3.5 mr-1.5" /> Browse
           </Button>
@@ -136,22 +136,22 @@ export default function OutputPanel() {
       {/* Name Template & Collision Policy */}
       <div className="grid grid-cols-2 gap-3 font-mono text-xs">
         <div className="space-y-1.5">
-          <Label className="text-[11px] text-zinc-400">Filename Template</Label>
+          <Label className="text-[11px] text-muted-foreground">Filename Template</Label>
           <Input
             value={settings.output.nameTemplate}
             onChange={(e) =>
               dispatch(updateOutputSettings({ nameTemplate: e.target.value }))
             }
             placeholder="{name}_nightshift"
-            className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800"
+            className="h-8 text-xs font-mono bg-muted border-border"
           />
-          <p className="text-[10px] text-zinc-500 font-sans">
+          <p className="text-[10px] text-muted-foreground font-sans">
             Use <code className="text-primary font-mono">{`{name}`}</code> for original base name.
           </p>
         </div>
 
         <div className="space-y-1.5">
-          <Label className="text-[11px] text-zinc-400">Collision Policy</Label>
+          <Label className="text-[11px] text-muted-foreground">Collision Policy</Label>
           <RadioGroup
             value={settings.output.collision}
             onValueChange={(val) =>
@@ -169,14 +169,14 @@ export default function OutputPanel() {
                 className={`flex flex-col p-2 rounded-lg border cursor-pointer font-mono transition-all ${
                   settings.output.collision === item.id
                     ? "bg-primary/10 border-primary text-primary"
-                    : "bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                    : "bg-muted/60 border-border text-muted-foreground hover:border-border"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-[11px]">{item.label}</span>
                   <RadioGroupItem value={item.id} id={`collision-${item.id}`} className="sr-only" />
                 </div>
-                <span className="text-[9px] text-zinc-500 font-sans">{item.desc}</span>
+                <span className="text-[9px] text-muted-foreground font-sans">{item.desc}</span>
               </Label>
             ))}
           </RadioGroup>
@@ -185,8 +185,8 @@ export default function OutputPanel() {
 
       {/* Resolved Output Preview */}
       {plannedOutputs.length > 0 && (
-        <div className="space-y-1.5 pt-2 border-t border-zinc-800/60 font-mono text-xs">
-          <div className="flex items-center gap-1.5 text-zinc-400 text-[11px]">
+        <div className="space-y-1.5 pt-2 border-t border-border/60 font-mono text-xs">
+          <div className="flex items-center gap-1.5 text-muted-foreground text-[11px]">
             <FileOutput className="w-3.5 h-3.5 text-primary" />
             <span>Planned Output Preview:</span>
           </div>
@@ -194,7 +194,7 @@ export default function OutputPanel() {
             {plannedOutputs.map((p, idx) => (
               <div
                 key={idx}
-                className="text-[11px] bg-zinc-900/80 px-2.5 py-1.5 rounded border border-zinc-800/80 text-zinc-300 truncate"
+                className="text-[11px] bg-muted/80 px-2.5 py-1.5 rounded border border-border/80 text-foreground truncate"
               >
                 {p.output}
               </div>

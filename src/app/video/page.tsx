@@ -44,6 +44,7 @@ import TerminalOutput from "@/components/videoTool/TerminalOutput";
 import PanelBlock from "@/components/PanelBlock";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 
 export default function VideoToolPage() {
   const dispatch = useAppDispatch();
@@ -104,20 +105,20 @@ export default function VideoToolPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100 flex flex-col font-sans selection:bg-primary/30">
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/30">
       {/* Top Header */}
-      <header className="sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/80 px-6 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-md border-b border-border/80 px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link
             href="/"
-            className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-white transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
             <span>Dashboard</span>
           </Link>
-          <div className="h-4 w-px bg-zinc-800" />
+          <div className="h-4 w-px bg-muted" />
           <div className="flex items-center gap-2">
-            <span className="font-bold text-sm tracking-wide text-zinc-100">
+            <span className="font-bold text-sm tracking-wide text-foreground">
               Video Studio
             </span>
             <span className="text-[10px] bg-primary/10 text-primary border border-primary/20 px-1.5 py-0.5 rounded font-mono font-medium">
@@ -127,9 +128,14 @@ export default function VideoToolPage() {
         </div>
 
         <div className="flex items-center gap-3">
+
+          <div className="w-6 h-6 text-primary flex items-center justify-center">
+                     <AnimatedThemeToggler  variant="circle"/>
+                   </div>
+                   
           <Link
             href="/settings"
-            className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors font-mono"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors font-mono"
           >
             Settings
           </Link>
@@ -172,16 +178,16 @@ export default function VideoToolPage() {
 
           {/* Manual Mode Banner */}
           {videoState.commandMode === "manual" && (
-            <div className="flex items-center justify-between p-3.5 bg-amber-950/40 border border-amber-800/60 rounded-xl text-amber-200 text-xs font-mono">
+            <div className="flex items-center justify-between p-3.5 bg-accent/10 border border-accent/60 rounded-xl text-accent-foreground text-xs font-mono">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400" />
+                <Sparkles className="w-4 h-4 text-accent-foreground" />
                 <span>Manual command mode active. Visual controls are locked.</span>
               </div>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => dispatch(resetToAuto())}
-                className="h-7 text-xs border-amber-800 text-amber-300 hover:bg-amber-900/40"
+                className="h-7 text-xs border-accent text-accent-foreground hover:bg-accent/10"
               >
                 <RotateCcw className="w-3 h-3 mr-1" /> Reset to Auto
               </Button>
@@ -238,7 +244,7 @@ export default function VideoToolPage() {
           <PanelBlock title="FFmpeg Command Stream">
             <div className="space-y-3 font-mono text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] text-zinc-400">
+                <span className="text-[11px] text-muted-foreground">
                   {videoState.commandMode === "manual"
                     ? "Direct manual command (editing enabled):"
                     : plannedOutputs.length > 1
@@ -251,11 +257,11 @@ export default function VideoToolPage() {
                     size="sm"
                     variant="ghost"
                     onClick={handleCopy}
-                    className="h-7 px-2 text-xs text-zinc-400 hover:text-zinc-200"
+                    className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
                   >
                     {copied ? (
                       <>
-                        <Check className="w-3.5 h-3.5 mr-1 text-green-400" /> Copied
+                        <Check className="w-3.5 h-3.5 mr-1 text-primary" /> Copied
                       </>
                     ) : (
                       <>
@@ -268,7 +274,7 @@ export default function VideoToolPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => setShowTerminal(true)}
-                    className="h-7 px-2 text-xs border-zinc-800 hover:bg-zinc-800 text-zinc-300"
+                    className="h-7 px-2 text-xs border-border hover:bg-muted text-foreground"
                   >
                     <Terminal className="w-3.5 h-3.5 mr-1" /> Standalone Run
                   </Button>
@@ -279,7 +285,7 @@ export default function VideoToolPage() {
                 value={displayCommandStr}
                 onChange={(e) => handleManualEdit(e.target.value)}
                 rows={4}
-                className="font-mono text-xs leading-relaxed bg-zinc-950 border-zinc-800 text-zinc-200 focus:border-primary resize-y"
+                className="font-mono text-xs leading-relaxed bg-card border-border text-foreground focus:border-primary resize-y"
                 placeholder="ffmpeg -i input.mp4 ..."
               />
             </div>

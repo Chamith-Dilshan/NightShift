@@ -111,7 +111,7 @@ export default function TemplateManager() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Bookmark className="w-4 h-4 text-primary" />
-          <Label className="text-sm font-semibold text-zinc-200">
+          <Label className="text-sm font-semibold text-foreground">
             Presets & Templates
           </Label>
         </div>
@@ -121,14 +121,14 @@ export default function TemplateManager() {
             size="sm"
             variant="ghost"
             onClick={handleExport}
-            className="h-7 px-2 text-xs text-zinc-400 hover:text-zinc-200 font-mono"
+            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground font-mono"
             title="Export custom templates to JSON"
           >
             <Download className="w-3.5 h-3.5 mr-1" /> Export
           </Button>
 
           <label className="cursor-pointer">
-            <span className="inline-flex items-center justify-center h-7 px-2 text-xs text-zinc-400 hover:text-zinc-200 font-mono hover:bg-zinc-800 rounded-md transition-colors">
+            <span className="inline-flex items-center justify-center h-7 px-2 text-xs text-muted-foreground hover:text-foreground font-mono hover:bg-muted rounded-md transition-colors">
               <Upload className="w-3.5 h-3.5 mr-1" /> Import
             </span>
             <input
@@ -148,11 +148,11 @@ export default function TemplateManager() {
             value={activeTemplateId || ""}
             onValueChange={handleSelect}
           >
-            <SelectTrigger className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800 flex-1">
+            <SelectTrigger className="h-8 text-xs font-mono bg-muted border-border flex-1">
               <SelectValue placeholder="Choose a preset..." />
             </SelectTrigger>
-            <SelectContent className="bg-zinc-900 border-zinc-800 text-xs font-mono">
-              <div className="px-2 py-1 text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">
+            <SelectContent className="bg-muted border-border text-xs font-mono">
+              <div className="px-2 py-1 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
                 Built-in Presets
               </div>
               {templateList
@@ -165,7 +165,7 @@ export default function TemplateManager() {
 
               {templateList.some((t) => !t.isBuiltIn) && (
                 <>
-                  <div className="px-2 py-1 mt-2 text-[10px] text-zinc-500 font-semibold uppercase tracking-wider border-t border-zinc-800/80">
+                  <div className="px-2 py-1 mt-2 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider border-t border-border/80">
                     Custom Templates
                   </div>
                   {templateList
@@ -184,7 +184,7 @@ export default function TemplateManager() {
             <Button
               size="sm"
               onClick={() => setIsSaving(true)}
-              className="h-8 px-2.5 text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 shrink-0 font-mono"
+              className="h-8 px-2.5 text-xs bg-muted hover:bg-muted-foreground/20 text-foreground shrink-0 font-mono"
             >
               <Save className="w-3.5 h-3.5 mr-1" /> Save
             </Button>
@@ -193,12 +193,12 @@ export default function TemplateManager() {
 
         {/* Save as new template */}
         {isSaving && (
-          <div className="flex gap-2 p-2.5 bg-zinc-900/60 border border-zinc-800 rounded-lg">
+          <div className="flex gap-2 p-2.5 bg-muted/60 border border-border rounded-lg">
             <Input
               value={newTemplateName}
               onChange={(e) => setNewTemplateName(e.target.value)}
               placeholder="Template name..."
-              className="h-7 text-xs font-mono bg-zinc-900 border-zinc-700"
+              className="h-7 text-xs font-mono bg-muted border-border"
               autoFocus
               onKeyDown={(e) => e.key === "Enter" && handleSave()}
             />
@@ -213,7 +213,7 @@ export default function TemplateManager() {
               size="sm"
               variant="ghost"
               onClick={() => setIsSaving(false)}
-              className="h-7 px-2 text-xs text-zinc-400 font-mono"
+              className="h-7 px-2 text-xs text-muted-foreground font-mono"
             >
               Cancel
             </Button>
@@ -222,13 +222,13 @@ export default function TemplateManager() {
 
         {/* Selected custom template management (rename / delete) */}
         {activeTemplate && !activeTemplate.isBuiltIn && (
-          <div className="flex items-center justify-between p-2 bg-zinc-900/40 border border-zinc-800/60 rounded-lg text-[11px] text-zinc-400">
+          <div className="flex items-center justify-between p-2 bg-muted/40 border border-border/60 rounded-lg text-[11px] text-muted-foreground">
             {editingId === activeTemplate.id ? (
               <div className="flex gap-2 flex-1 mr-2">
                 <Input
                   value={renameText}
                   onChange={(e) => setRenameText(e.target.value)}
-                  className="h-6 text-xs font-mono bg-zinc-900 border-zinc-700"
+                  className="h-6 text-xs font-mono bg-muted border-border"
                   autoFocus
                   onKeyDown={(e) =>
                     e.key === "Enter" && handleRename(activeTemplate.id)
@@ -254,7 +254,7 @@ export default function TemplateManager() {
                   setEditingId(activeTemplate.id);
                   setRenameText(activeTemplate.name);
                 }}
-                className="h-6 w-6 text-zinc-400 hover:text-zinc-200"
+                className="h-6 w-6 text-muted-foreground hover:text-foreground"
                 title="Rename template"
               >
                 <Edit2 className="w-3 h-3" />
@@ -263,7 +263,7 @@ export default function TemplateManager() {
                 variant="ghost"
                 size="icon"
                 onClick={() => dispatch(deleteTemplate(activeTemplate.id))}
-                className="h-6 w-6 text-zinc-400 hover:text-red-400"
+                className="h-6 w-6 text-muted-foreground hover:text-destructive"
                 title="Delete template"
               >
                 <Trash2 className="w-3 h-3" />

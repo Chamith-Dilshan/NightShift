@@ -50,10 +50,10 @@ export default function AudioPanel() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <VolumeX className="w-4 h-4 text-zinc-500" />
-          <Label className="text-sm font-semibold text-zinc-400">Audio Processing</Label>
+          <VolumeX className="w-4 h-4 text-muted-foreground" />
+          <Label className="text-sm font-semibold text-muted-foreground">Audio Processing</Label>
         </div>
-        <p className="text-xs text-zinc-500 font-mono">
+        <p className="text-xs text-muted-foreground font-mono">
           Audio tracks are automatically excluded for GIF container exports.
         </p>
       </div>
@@ -67,14 +67,14 @@ export default function AudioPanel() {
           {audio.enabled ? (
             <Volume2 className="w-4 h-4 text-primary" />
           ) : (
-            <VolumeX className="w-4 h-4 text-zinc-500" />
+            <VolumeX className="w-4 h-4 text-muted-foreground" />
           )}
-          <Label className="text-sm font-semibold text-zinc-200">
+          <Label className="text-sm font-semibold text-foreground">
             Audio Track
           </Label>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-zinc-400 font-mono">
+          <span className="text-xs text-muted-foreground font-mono">
             {audio.enabled ? "Enabled" : "Remove Audio"}
           </span>
           <Switch
@@ -87,13 +87,13 @@ export default function AudioPanel() {
       </div>
 
       {audio.enabled && (
-        <div className="space-y-4 pt-1 border-t border-zinc-800/60 font-mono text-xs">
+        <div className="space-y-4 pt-1 border-t border-border/60 font-mono text-xs">
           {/* Audio Codec Selection */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-[11px] text-zinc-400">Audio Codec</Label>
+              <Label className="text-[11px] text-muted-foreground">Audio Codec</Label>
               {resolvedCodecInfo.adjusted && (
-                <span className="text-[10px] bg-amber-950/40 text-amber-400 border border-amber-800/40 px-2 py-0.5 rounded font-mono">
+                <span className="text-[10px] bg-accent/10 text-accent-foreground border border-accent/40 px-2 py-0.5 rounded font-mono">
                   Adjusted to {resolvedCodecInfo.codec} for {settings.output.format.toUpperCase()}
                 </span>
               )}
@@ -107,10 +107,10 @@ export default function AudioPanel() {
                 }
               }}
             >
-              <SelectTrigger className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800">
+              <SelectTrigger className="h-8 text-xs font-mono bg-muted border-border">
                 <SelectValue placeholder="Select codec" />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-zinc-800 text-xs font-mono">
+              <SelectContent className="bg-muted border-border text-xs font-mono">
                 {codecOptions.map((opt) => {
                   const isAllowed = allowedCodecs.includes(opt.id);
                   const isSupported =
@@ -128,9 +128,9 @@ export default function AudioPanel() {
                       <div className="flex items-center justify-between gap-4">
                         <span>{opt.label}</span>
                         {!isSupported ? (
-                          <span className="text-[10px] text-red-400">(Unavailable)</span>
+                          <span className="text-[10px] text-destructive">(Unavailable)</span>
                         ) : !isAllowed ? (
-                          <span className="text-[10px] text-zinc-500">(Incompatible container)</span>
+                          <span className="text-[10px] text-muted-foreground">(Incompatible container)</span>
                         ) : null}
                       </div>
                     </SelectItem>
@@ -144,7 +144,7 @@ export default function AudioPanel() {
             <div className="grid grid-cols-2 gap-3">
               {audio.codec !== "flac" && (
                 <div className="space-y-1.5">
-                  <Label className="text-[11px] text-zinc-400">Audio Bitrate</Label>
+                  <Label className="text-[11px] text-muted-foreground">Audio Bitrate</Label>
                   <Select
                     value={audio.bitrate}
                     onValueChange={(bitrate) => {
@@ -153,10 +153,10 @@ export default function AudioPanel() {
                       }
                     }}
                   >
-                    <SelectTrigger className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800">
+                    <SelectTrigger className="h-8 text-xs font-mono bg-muted border-border">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-zinc-800 text-xs font-mono">
+                    <SelectContent className="bg-muted border-border text-xs font-mono">
                       {bitrateOptions.map((b) => (
                         <SelectItem key={b} value={b}>
                           {b}
@@ -168,7 +168,7 @@ export default function AudioPanel() {
               )}
 
               <div className="space-y-1.5">
-                <Label className="text-[11px] text-zinc-400">Channel Layout</Label>
+                <Label className="text-[11px] text-muted-foreground">Channel Layout</Label>
                 <Select
                   value={audio.channels.toString()}
                   onValueChange={(val) => {
@@ -181,10 +181,10 @@ export default function AudioPanel() {
                     }
                   }}
                 >
-                  <SelectTrigger className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800">
+                  <SelectTrigger className="h-8 text-xs font-mono bg-muted border-border">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-zinc-800 text-xs font-mono">
+                  <SelectContent className="bg-muted border-border text-xs font-mono">
                     {channelOptions.map((c) => (
                       <SelectItem key={c.value} value={c.value.toString()}>
                         {c.label}

@@ -127,16 +127,16 @@ export default function TerminalOutput({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <Card className="flex flex-col w-full max-w-4xl h-[80vh] overflow-hidden border shadow-2xl bg-zinc-950 rounded-2xl">
+      <Card className="flex flex-col w-full max-w-4xl h-[80vh] overflow-hidden border shadow-2xl bg-card rounded-2xl">
         {/* Fake Window Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-zinc-900 border-b border-zinc-800 shrink-0">
+        <div className="flex items-center justify-between px-4 py-3 bg-muted border-b border-border shrink-0">
           <div className="flex items-center gap-2">
             <div className="flex gap-1.5 ml-1">
-              <div className="w-3 h-3 rounded-full bg-red-500/80 border border-red-600/50" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500/80 border border-yellow-600/50" />
-              <div className="w-3 h-3 rounded-full bg-green-500/80 border border-green-600/50" />
+              <div className="w-3 h-3 rounded-full bg-destructive/80 border border-destructive/50" />
+              <div className="w-3 h-3 rounded-full bg-accent/80 border border-accent/50" />
+              <div className="w-3 h-3 rounded-full bg-primary/80 border border-primary/50" />
             </div>
-            <span className="text-xs font-mono text-zinc-400 ml-4 font-semibold tracking-wide">
+            <span className="text-xs font-mono text-muted-foreground ml-4 font-semibold tracking-wide">
               nightshift-runner — {tool}
             </span>
           </div>
@@ -164,7 +164,7 @@ export default function TerminalOutput({
               size="icon"
               variant="ghost"
               onClick={onClose}
-              className="h-7 w-7 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
+              className="h-7 w-7 rounded-lg text-muted-foreground hover:text-white hover:bg-muted"
               disabled={isRunning}
               title={isRunning ? "Cannot close while process is running" : "Close Terminal"}
             >
@@ -175,30 +175,30 @@ export default function TerminalOutput({
 
         {/* Progress header if active */}
         {progressPercent != null && (
-          <div className="px-5 py-2.5 bg-zinc-900/60 border-b border-zinc-800 flex items-center justify-between text-xs font-mono">
+          <div className="px-5 py-2.5 bg-muted/60 border-b border-border flex items-center justify-between text-xs font-mono">
             <div className="flex items-center gap-3 flex-1 max-w-md">
-              <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+              <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
                 <div
                   className="bg-primary h-full transition-all duration-200"
                   style={{ width: `${progressPercent.toFixed(1)}%` }}
                 />
               </div>
-              <span className="text-zinc-300 w-12 text-right">{progressPercent.toFixed(1)}%</span>
+              <span className="text-foreground w-12 text-right">{progressPercent.toFixed(1)}%</span>
             </div>
-            {progressStats && <span className="text-zinc-400">{progressStats}</span>}
+            {progressStats && <span className="text-muted-foreground">{progressStats}</span>}
           </div>
         )}
 
         {/* Live Output Log Area */}
         <div
           ref={scrollRef}
-          className="flex-1 p-5 overflow-y-auto font-mono text-[13px] leading-relaxed text-zinc-300 selection:bg-primary/30"
-          style={{ scrollbarWidth: "thin", scrollbarColor: "#3f3f46 transparent" }}
+          className="flex-1 p-5 overflow-y-auto font-mono text-[13px] leading-relaxed text-foreground selection:bg-primary/30"
+          style={{ scrollbarWidth: "thin", scrollbarColor: "var(--border) transparent" }}
         >
           {logs.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-zinc-600 space-y-3">
+            <div className="h-full flex flex-col items-center justify-center text-muted-foreground/70 space-y-3">
               <p>Ready to execute native FFmpeg process.</p>
-              <p className="text-xs text-zinc-700">Click &quot;Start Execution&quot; to begin.</p>
+              <p className="text-xs text-muted-foreground/70">Click &quot;Start Execution&quot; to begin.</p>
             </div>
           ) : (
             <div className="space-y-1 pb-4">
@@ -212,12 +212,12 @@ export default function TerminalOutput({
                     key={i}
                     className={`whitespace-pre-wrap break-all ${
                       isError
-                        ? "text-red-400 font-semibold"
+                        ? "text-destructive font-semibold"
                         : isSystem
-                        ? "text-blue-400"
+                        ? "text-secondary-foreground"
                         : isProgress
-                        ? "text-green-400/80"
-                        : "text-zinc-300"
+                        ? "text-primary/80"
+                        : "text-foreground"
                     }`}
                   >
                     {log}
@@ -232,21 +232,21 @@ export default function TerminalOutput({
               )}
 
               {exitInfo && (
-                <div className="mt-4 pt-3 border-t border-zinc-800 flex items-center gap-2 text-xs">
+                <div className="mt-4 pt-3 border-t border-border flex items-center gap-2 text-xs">
                   {exitInfo.code === 0 ? (
-                    <span className="text-green-400 flex items-center gap-1.5 font-semibold">
+                    <span className="text-primary flex items-center gap-1.5 font-semibold">
                       <CheckCircle2 className="w-4 h-4" /> Finished (Exit Code 0)
                     </span>
                   ) : exitInfo.cancelled ? (
-                    <span className="text-yellow-400 flex items-center gap-1.5 font-semibold">
+                    <span className="text-accent-foreground flex items-center gap-1.5 font-semibold">
                       <AlertCircle className="w-4 h-4" /> Cancelled
                     </span>
                   ) : (
-                    <span className="text-red-400 flex items-center gap-1.5 font-semibold">
+                    <span className="text-destructive flex items-center gap-1.5 font-semibold">
                       <AlertCircle className="w-4 h-4" /> Failed (Exit Code {exitInfo.code ?? "?"})
                     </span>
                   )}
-                  <span className="text-zinc-500">
+                  <span className="text-muted-foreground">
                     Duration: {(exitInfo.durationMs / 1000).toFixed(2)}s
                   </span>
                 </div>

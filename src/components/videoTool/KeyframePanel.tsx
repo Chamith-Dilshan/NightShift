@@ -27,7 +27,7 @@ export function KeyframePanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <KeyRound className="w-4 h-4 text-primary" />
-          <Label className="text-sm font-semibold text-zinc-200">
+          <Label className="text-sm font-semibold text-foreground">
             Keyframe Interval (GOP)
           </Label>
         </div>
@@ -44,7 +44,7 @@ export function KeyframePanel() {
       </div>
 
       {keyframe.enabled && (
-        <div className="space-y-3 pt-1 border-t border-zinc-800/60 font-mono text-xs">
+        <div className="space-y-3 pt-1 border-t border-border/60 font-mono text-xs">
           <div className="flex flex-wrap gap-1.5">
             {quickIntervals.map((item) => (
               <Button
@@ -68,7 +68,7 @@ export function KeyframePanel() {
           </div>
 
           <div className="space-y-1.5 pt-1">
-            <Label className="text-[11px] text-zinc-400">
+            <Label className="text-[11px] text-muted-foreground">
               Custom Interval (Frames)
             </Label>
             <Input
@@ -86,11 +86,11 @@ export function KeyframePanel() {
                   })
                 )
               }
-              className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800"
+              className="h-8 text-xs font-mono bg-muted border-border"
             />
           </div>
 
-          <p className="text-[10px] text-zinc-500 leading-relaxed">
+          <p className="text-[10px] text-muted-foreground leading-relaxed">
             1 = All-Intra (every frame is a keyframe, optimal for scrubbing on web canvases).
           </p>
         </div>

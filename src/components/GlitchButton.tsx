@@ -24,8 +24,8 @@ export const GlitchButton: React.FC<GlitchButtonProps> = ({
 
   const textShadowStyle = {
     textShadow: `
-      -1.5px -1.5px 0 var(--color-brand-600-dark) dark:var(--color-brand-600), 
-      1.5px 1.5px 0 var(--color-brand-500-dark) dark:var(--color-brand-500)
+      -1.5px -1.5px 0 var(--accent),
+      1.5px 1.5px 0 var(--primary)
     `,
   };
 
@@ -38,7 +38,7 @@ export const GlitchButton: React.FC<GlitchButtonProps> = ({
   };
 
   const containerClasses = cn(
-    "tool-btn bg-brand-200 dark:bg-brand-500-dark text-white dark:text-white font-bold",
+    "tool-btn bg-secondary text-secondary-foreground font-bold",
     "relative overflow-hidden",
     isClicked ? "click-glitch" : "",
     className,
@@ -71,14 +71,14 @@ export const GlitchButton: React.FC<GlitchButtonProps> = ({
           className={`
             absolute inset-0 
             overflow-hidden 
-            bg-brand-50 dark:bg-brand-50-dark
+            bg-background
             ${isClicked ? "glitch-skew" : ""}
           `}
         >
           {/* Top Layer */}
-          <div className="absolute left-0 w-full h-1/3 top-0 bg-brand-50 dark:bg-brand-50-dark overflow-hidden glitch-layer-1">
+          <div className="absolute left-0 w-full h-1/3 top-0 bg-background overflow-hidden glitch-layer-1">
             <div
-              className="absolute w-full bg-brand-500-dark dark:bg-brand-500  top-0 left-0 right-0 flex gap-4 items-center justify-center h-full"
+              className="absolute w-full bg-primary text-primary-foreground top-0 left-0 right-0 flex gap-4 items-center justify-center h-full"
               style={textShadowStyle}
             >
               <div className="transform translate-y-0 mt-11.25 flex gap-4 items-center">
@@ -88,9 +88,9 @@ export const GlitchButton: React.FC<GlitchButtonProps> = ({
           </div>
 
           {/* Middle Layer */}
-          <div className="absolute left-0 w-full h-1/3 top-1/3 bg-brand-50 dark:bg-brand-50-dark  overflow-hidden glitch-layer-2">
+          <div className="absolute left-0 w-full h-1/3 top-1/3 bg-background overflow-hidden glitch-layer-2">
             <div
-              className="absolute w-full bg-brand-500-dark dark:bg-brand-500 top-0 left-0 right-0 flex gap-4 items-center justify-center h-[300%] -translate-y-1/3"
+              className="absolute w-full bg-primary text-primary-foreground top-0 left-0 right-0 flex gap-4 items-center justify-center h-[300%] -translate-y-1/3"
               style={textShadowStyle}
             >
               <div className="flex gap-4 items-center">{children}</div>
@@ -98,9 +98,9 @@ export const GlitchButton: React.FC<GlitchButtonProps> = ({
           </div>
 
           {/* Bottom Layer */}
-          <div className="absolute left-0 w-full h-1/3 top-2/3 bg-brand-50 dark:bg-brand-50-dark  overflow-hidden glitch-layer-3">
+          <div className="absolute left-0 w-full h-1/3 top-2/3 bg-background overflow-hidden glitch-layer-3">
             <div
-              className="absolute w-full bg-brand-500-dark dark:bg-brand-500 top-0 left-0 right-0 flex gap-4 items-center justify-center h-[300%] -translate-y-2/3"
+              className="absolute w-full bg-primary text-primary-foreground top-0 left-0 right-0 flex gap-4 items-center justify-center h-[300%] -translate-y-2/3"
               style={textShadowStyle}
             >
               <div className="flex gap-4 items-center">{children}</div>
