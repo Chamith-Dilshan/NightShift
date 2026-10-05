@@ -24,7 +24,7 @@ export default function TransformPanel() {
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <RotateCw className="w-4 h-4 text-primary" />
-        <Label className="text-sm font-semibold text-zinc-200">
+        <Label className="text-sm font-semibold text-foreground">
           Transform & Orientation
         </Label>
       </div>
@@ -32,7 +32,7 @@ export default function TransformPanel() {
       <div className="space-y-3 font-mono text-xs">
         {/* Rotation */}
         <div className="space-y-1.5">
-          <Label className="text-[11px] text-zinc-400">Rotation</Label>
+          <Label className="text-[11px] text-muted-foreground">Rotation</Label>
           <div className="grid grid-cols-4 gap-2">
             {rotations.map((r) => (
               <Button

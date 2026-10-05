@@ -143,11 +143,11 @@ export default function InputPanel() {
   }, [dispatch, handleProbe]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 bg-background">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-base font-semibold text-zinc-200">Source Files</h2>
-          <p className="text-xs text-zinc-400">
+          <h2 className="text-base font-semibold text-primary-foreground">Source Files</h2>
+          <p className="text-xs text-muted-foreground">
             Drag & drop or select video files to transcode.
           </p>
         </div>
@@ -156,7 +156,7 @@ export default function InputPanel() {
             variant="ghost"
             size="sm"
             onClick={() => dispatch(clearInputFiles())}
-            className="text-xs text-zinc-400 hover:text-red-400 h-7 px-2"
+            className="text-xs text-muted-foreground hover:text-destructive h-7 px-2"
           >
             <RotateCcw className="w-3.5 h-3.5 mr-1" /> Clear Queue
           </Button>
@@ -166,22 +166,22 @@ export default function InputPanel() {
       <div
         ref={dropZoneRef}
         onClick={pickFiles}
-        className="group relative flex flex-col items-center justify-center p-6 border-2 border-dashed border-zinc-800 rounded-xl hover:border-primary/60 hover:bg-zinc-900/40 cursor-pointer transition-all duration-200"
+        className="group relative flex flex-col items-center justify-center p-6 border-2 border-dashed border-border rounded-xl hover:border-primary/60 hover:bg-muted/40 cursor-pointer transition-all duration-200"
       >
-        <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-primary group-hover:scale-105 transition-all">
+        <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center text-muted-foreground group-hover:text-primary group-hover:scale-105 transition-all">
           <UploadCloud className="w-5 h-5" />
         </div>
-        <p className="text-xs font-semibold text-zinc-300 mt-2.5">
+        <p className="text-xs font-semibold text-foreground mt-2.5">
           Drop media files here or click to browse
         </p>
-        <p className="text-[11px] text-zinc-500 mt-0.5 font-mono">
+        <p className="text-[11px] text-muted-foreground mt-0.5 font-mono">
           Supports MP4, MOV, WebM, MKV, GIF, etc.
         </p>
       </div>
 
       {inputFiles.length > 0 && (
         <div className="space-y-2 font-mono text-xs">
-          <div className="flex items-center justify-between text-[11px] text-zinc-500 px-1">
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground px-1">
             <span>QUEUED FILES ({inputFiles.length})</span>
             <span>METADATA</span>
           </div>
@@ -192,41 +192,41 @@ export default function InputPanel() {
               return (
                 <div
                   key={path}
-                  className="flex items-center justify-between p-2.5 bg-zinc-900/60 border border-zinc-800/80 rounded-lg hover:border-zinc-700 transition-colors"
+                  className="flex items-center justify-between p-2.5 bg-muted/60 border border-border/80 rounded-lg hover:border-border transition-colors"
                 >
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <Film className="w-4 h-4 text-zinc-400 shrink-0" />
+                    <Film className="w-4 h-4 text-muted-foreground shrink-0" />
                     <div className="truncate">
-                      <p className="text-xs font-medium text-zinc-200 truncate">
+                      <p className="text-xs font-medium text-foreground truncate">
                         {basename(path)}
                       </p>
-                      <p className="text-[10px] text-zinc-500 truncate">{path}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">{path}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3 shrink-0 ml-3">
                     {probe ? (
-                      <div className="flex items-center gap-2 text-[10px] text-zinc-400">
+                      <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                         {probe.width && probe.height && (
-                          <span className="flex items-center gap-1 bg-zinc-800 px-1.5 py-0.5 rounded">
-                            <Video className="w-3 h-3 text-zinc-400" />
+                          <span className="flex items-center gap-1 bg-muted px-1.5 py-0.5 rounded">
+                            <Video className="w-3 h-3 text-muted-foreground" />
                             {probe.width}x{probe.height}
                           </span>
                         )}
                         {probe.durationMs != null && (
-                          <span className="flex items-center gap-1 bg-zinc-800 px-1.5 py-0.5 rounded">
-                            <Clock className="w-3 h-3 text-zinc-400" />
+                          <span className="flex items-center gap-1 bg-muted px-1.5 py-0.5 rounded">
+                            <Clock className="w-3 h-3 text-muted-foreground" />
                             {(probe.durationMs / 1000).toFixed(1)}s
                           </span>
                         )}
                         {!probe.hasAudio && (
-                          <span className="flex items-center gap-1 text-amber-400/80 bg-amber-950/40 px-1.5 py-0.5 rounded">
+                          <span className="flex items-center gap-1 text-accent-foreground/80 bg-accent/10 px-1.5 py-0.5 rounded">
                             <FileAudio className="w-3 h-3" /> No Audio
                           </span>
                         )}
                       </div>
                     ) : (
-                      <span className="text-[10px] text-zinc-500 italic">Probing...</span>
+                      <span className="text-[10px] text-muted-foreground italic">Probing...</span>
                     )}
 
                     <Button
@@ -236,7 +236,7 @@ export default function InputPanel() {
                         e.stopPropagation();
                         dispatch(removeInputFile(idx));
                       }}
-                      className="h-6 w-6 text-zinc-500 hover:text-red-400 hover:bg-red-950/20"
+                      className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>

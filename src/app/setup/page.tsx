@@ -124,36 +124,36 @@ export default function SetupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100 flex flex-col items-center justify-center p-6 selection:bg-primary/30 font-sans">
-      <Card className="w-full max-w-lg bg-zinc-950 border border-zinc-800 shadow-2xl rounded-2xl overflow-hidden">
+    <div className="min-h-screen bg-black text-foreground flex flex-col items-center justify-center p-6 selection:bg-primary/30 font-sans">
+      <Card className="w-full max-w-lg bg-card border border-border shadow-2xl rounded-2xl overflow-hidden">
         <div className="p-8 space-y-6">
           {/* Header */}
           <div className="text-center space-y-2">
             <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/10">
               <DownloadCloud className="w-6 h-6" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-zinc-100">
+            <h1 className="text-xl font-bold tracking-tight text-foreground">
               Tool Environment Setup
             </h1>
-            <p className="text-xs text-zinc-400 leading-relaxed">
+            <p className="text-xs text-muted-foreground leading-relaxed">
               NightShift uses verified static FFmpeg &amp; FFprobe binaries without bundling them in the installer.
             </p>
           </div>
 
           {/* Current Status */}
           <div className="space-y-3 font-mono text-xs">
-            <div className="p-4 bg-zinc-900/60 border border-zinc-800 rounded-xl space-y-2">
+            <div className="p-4 bg-muted/60 border border-border rounded-xl space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-zinc-400">FFmpeg Status:</span>
+                <span className="text-muted-foreground">FFmpeg Status:</span>
                 <span className="font-semibold">
                   {loading ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-500 inline" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground inline" />
                   ) : ffmpegStatus?.source !== "missing" ? (
-                    <span className="text-green-400 flex items-center gap-1">
+                    <span className="text-primary flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" /> Detected ({ffmpegStatus?.source})
                     </span>
                   ) : (
-                    <span className="text-amber-400 flex items-center gap-1">
+                    <span className="text-accent-foreground flex items-center gap-1">
                       <AlertCircle className="w-3.5 h-3.5" /> Not Found
                     </span>
                   )}
@@ -161,7 +161,7 @@ export default function SetupPage() {
               </div>
 
               {ffmpegStatus?.version && (
-                <p className="text-[10px] text-zinc-500 truncate">
+                <p className="text-[10px] text-muted-foreground truncate">
                   {ffmpegStatus.version}
                 </p>
               )}
@@ -169,16 +169,16 @@ export default function SetupPage() {
 
             {/* Error banner */}
             {errorMessage && (
-              <div className="p-3 bg-red-950/40 border border-red-800/60 rounded-xl text-red-300 text-xs">
-                <p className="font-semibold text-red-400 mb-0.5">Installation Error:</p>
+              <div className="p-3 bg-destructive/10 border border-destructive/60 rounded-xl text-destructive text-xs">
+                <p className="font-semibold text-destructive mb-0.5">Installation Error:</p>
                 <p className="text-[11px]">{errorMessage}</p>
               </div>
             )}
 
             {/* Progress Bar */}
             {installing && (
-              <div className="space-y-2 p-4 bg-zinc-900/80 border border-primary/30 rounded-xl">
-                <div className="flex items-center justify-between text-xs text-zinc-300">
+              <div className="space-y-2 p-4 bg-muted/80 border border-primary/30 rounded-xl">
+                <div className="flex items-center justify-between text-xs text-foreground">
                   <span className="flex items-center gap-2">
                     <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
                     {installProgress.stage}
@@ -191,7 +191,7 @@ export default function SetupPage() {
                 </div>
 
                 {installProgress.percent != null && (
-                  <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
                     <div
                       className="bg-primary h-full transition-all duration-200"
                       style={{ width: `${installProgress.percent}%` }}
@@ -227,7 +227,7 @@ export default function SetupPage() {
                   variant="outline"
                   onClick={handleChooseCustom}
                   disabled={installing}
-                  className="w-full h-9 font-mono text-xs border-zinc-800 hover:bg-zinc-900 text-zinc-300"
+                  className="w-full h-9 font-mono text-xs border-border hover:bg-muted text-foreground"
                 >
                   <FolderOpen className="w-3.5 h-3.5 mr-2" />
                   Locate Existing FFmpeg Binary
@@ -237,8 +237,8 @@ export default function SetupPage() {
           </div>
 
           {/* License & Source Notice */}
-          <div className="pt-2 text-center text-[10px] text-zinc-500 space-y-1">
-            <p className="flex items-center justify-center gap-1 text-zinc-400">
+          <div className="pt-2 text-center text-[10px] text-muted-foreground space-y-1">
+            <p className="flex items-center justify-center gap-1 text-muted-foreground">
               <ShieldCheck className="w-3.5 h-3.5 text-primary" />
               Official builds downloaded from GitHub static releases.
             </p>

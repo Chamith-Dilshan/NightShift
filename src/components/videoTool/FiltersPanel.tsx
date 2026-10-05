@@ -37,7 +37,7 @@ export default function FiltersPanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-primary" />
-          <Label className="text-sm font-semibold text-zinc-200">
+          <Label className="text-sm font-semibold text-foreground">
             Visual Filters
           </Label>
         </div>
@@ -46,7 +46,7 @@ export default function FiltersPanel() {
             variant="ghost"
             size="sm"
             onClick={handleReset}
-            className="h-6 px-1.5 text-[10px] text-zinc-500 hover:text-zinc-300 font-mono"
+            className="h-6 px-1.5 text-[10px] text-muted-foreground hover:text-foreground font-mono"
           >
             <RotateCcw className="w-3 h-3 mr-1" /> Reset
           </Button>
@@ -55,8 +55,8 @@ export default function FiltersPanel() {
 
       <div className="space-y-4 font-mono text-xs">
         {/* Grayscale Toggle */}
-        <div className="flex items-center justify-between p-2.5 bg-zinc-900/60 border border-zinc-800 rounded-lg">
-          <Label className="text-xs text-zinc-300 font-medium">Grayscale (B&W)</Label>
+        <div className="flex items-center justify-between p-2.5 bg-muted/60 border border-border rounded-lg">
+          <Label className="text-xs text-foreground font-medium">Grayscale (B&W)</Label>
           <Switch
             checked={filters.grayscale}
             onCheckedChange={(grayscale) =>
@@ -66,9 +66,9 @@ export default function FiltersPanel() {
         </div>
 
         {/* Saturation Slider */}
-        <div className="space-y-1.5 p-3 bg-zinc-900/40 border border-zinc-800/80 rounded-lg">
-          <div className="flex items-center justify-between text-zinc-300">
-            <span className="text-[11px] text-zinc-400">Color Saturation</span>
+        <div className="space-y-1.5 p-3 bg-muted/40 border border-border/80 rounded-lg">
+          <div className="flex items-center justify-between text-foreground">
+            <span className="text-[11px] text-muted-foreground">Color Saturation</span>
             <span className="text-primary font-bold">{filters.saturation.toFixed(1)}x</span>
           </div>
           <Slider
@@ -85,9 +85,9 @@ export default function FiltersPanel() {
         </div>
 
         {/* Blur Slider */}
-        <div className="space-y-1.5 p-3 bg-zinc-900/40 border border-zinc-800/80 rounded-lg">
-          <div className="flex items-center justify-between text-zinc-300">
-            <span className="text-[11px] text-zinc-400">Gaussian Blur (sigma)</span>
+        <div className="space-y-1.5 p-3 bg-muted/40 border border-border/80 rounded-lg">
+          <div className="flex items-center justify-between text-foreground">
+            <span className="text-[11px] text-muted-foreground">Gaussian Blur (sigma)</span>
             <span className="text-primary font-bold">{filters.blur}</span>
           </div>
           <Slider
@@ -104,9 +104,9 @@ export default function FiltersPanel() {
         </div>
 
         {/* Sharpen Slider */}
-        <div className="space-y-1.5 p-3 bg-zinc-900/40 border border-zinc-800/80 rounded-lg">
-          <div className="flex items-center justify-between text-zinc-300">
-            <span className="text-[11px] text-zinc-400">Unsharp / Sharpen</span>
+        <div className="space-y-1.5 p-3 bg-muted/40 border border-border/80 rounded-lg">
+          <div className="flex items-center justify-between text-foreground">
+            <span className="text-[11px] text-muted-foreground">Unsharp / Sharpen</span>
             <span className="text-primary font-bold">{filters.sharpen.toFixed(1)}</span>
           </div>
           <Slider

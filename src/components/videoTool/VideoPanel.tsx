@@ -75,13 +75,13 @@ export default function VideoPanel() {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Video className="w-4 h-4 text-primary" />
-          <Label className="text-sm font-semibold text-zinc-200">
+          <Label className="text-sm font-semibold text-foreground">
             GIF Pipeline Settings
           </Label>
         </div>
         <div className="grid grid-cols-2 gap-3 font-mono text-xs">
           <div className="space-y-1.5">
-            <Label className="text-[11px] text-zinc-400">Canvas Width (px)</Label>
+            <Label className="text-[11px] text-muted-foreground">Canvas Width (px)</Label>
             <Input
               type="number"
               value={settings.gif.width}
@@ -96,11 +96,11 @@ export default function VideoPanel() {
                   })
                 )
               }
-              className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800"
+              className="h-8 text-xs font-mono bg-muted border-border"
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-[11px] text-zinc-400">Frame Rate (FPS)</Label>
+            <Label className="text-[11px] text-muted-foreground">Frame Rate (FPS)</Label>
             <Input
               type="number"
               value={settings.gif.fps}
@@ -115,7 +115,7 @@ export default function VideoPanel() {
                   })
                 )
               }
-              className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800"
+              className="h-8 text-xs font-mono bg-muted border-border"
             />
           </div>
         </div>
@@ -128,7 +128,7 @@ export default function VideoPanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Video className="w-4 h-4 text-primary" />
-          <Label className="text-sm font-semibold text-zinc-200">
+          <Label className="text-sm font-semibold text-foreground">
             Video Processing
           </Label>
         </div>
@@ -141,13 +141,13 @@ export default function VideoPanel() {
       </div>
 
       {video.enabled && (
-        <div className="space-y-4 pt-1 border-t border-zinc-800/60 font-mono text-xs">
+        <div className="space-y-4 pt-1 border-t border-border/60 font-mono text-xs">
           {/* Codec Selection */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-[11px] text-zinc-400">Video Codec</Label>
+              <Label className="text-[11px] text-muted-foreground">Video Codec</Label>
               {resolvedCodecInfo.adjusted && (
-                <span className="text-[10px] bg-amber-950/40 text-amber-400 border border-amber-800/40 px-2 py-0.5 rounded font-mono">
+                <span className="text-[10px] bg-accent/10 text-accent-foreground border border-accent/40 px-2 py-0.5 rounded font-mono">
                   Adjusted to {resolvedCodecInfo.codec} for {settings.output.format.toUpperCase()}
                 </span>
               )}
@@ -161,10 +161,10 @@ export default function VideoPanel() {
                 }
               }}
             >
-              <SelectTrigger className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800">
+              <SelectTrigger className="h-8 text-xs font-mono bg-muted border-border">
                 <SelectValue placeholder="Select codec" />
               </SelectTrigger>
-              <SelectContent className="bg-zinc-900 border-zinc-800 text-xs font-mono">
+              <SelectContent className="bg-muted border-border text-xs font-mono">
                 {codecOptions.map((opt) => {
                   const isAllowed = allowedCodecs.includes(opt.id);
                   const isSupported =
@@ -182,9 +182,9 @@ export default function VideoPanel() {
                       <div className="flex items-center justify-between gap-4">
                         <span>{opt.label}</span>
                         {!isSupported ? (
-                          <span className="text-[10px] text-red-400">(Unavailable in FFmpeg)</span>
+                          <span className="text-[10px] text-destructive">(Unavailable in FFmpeg)</span>
                         ) : !isAllowed ? (
-                          <span className="text-[10px] text-zinc-500">(Incompatible container)</span>
+                          <span className="text-[10px] text-muted-foreground">(Incompatible container)</span>
                         ) : null}
                       </div>
                     </SelectItem>
@@ -200,10 +200,10 @@ export default function VideoPanel() {
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Sliders className="w-3.5 h-3.5 text-zinc-400" />
-                    <Label className="text-[11px] text-zinc-400">Rate Control</Label>
+                    <Sliders className="w-3.5 h-3.5 text-muted-foreground" />
+                    <Label className="text-[11px] text-muted-foreground">Rate Control</Label>
                   </div>
-                  <div className="flex gap-1 bg-zinc-900 p-0.5 rounded-lg border border-zinc-800">
+                  <div className="flex gap-1 bg-muted p-0.5 rounded-lg border border-border">
                     <Button
                       type="button"
                       variant={video.rateControl === "crf" ? "default" : "ghost"}
@@ -226,8 +226,8 @@ export default function VideoPanel() {
                 </div>
 
                 {video.rateControl === "crf" ? (
-                  <div className="space-y-1.5 p-3 bg-zinc-900/50 rounded-lg border border-zinc-800/60">
-                    <div className="flex items-center justify-between text-zinc-300">
+                  <div className="space-y-1.5 p-3 bg-muted/50 rounded-lg border border-border/60">
+                    <div className="flex items-center justify-between text-foreground">
                       <span>CRF Factor</span>
                       <span className="text-primary font-bold">{video.crf}</span>
                     </div>
@@ -242,22 +242,22 @@ export default function VideoPanel() {
                       }}
                       className="py-1"
                     />
-                    <div className="flex justify-between text-[10px] text-zinc-500 font-sans">
+                    <div className="flex justify-between text-[10px] text-muted-foreground font-sans">
                       <span>Lossless (0)</span>
                       <span>Balanced (~23)</span>
                       <span>High Compression</span>
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-1.5 p-3 bg-zinc-900/50 rounded-lg border border-zinc-800/60">
-                    <Label className="text-[11px] text-zinc-400">Video Target Bitrate</Label>
+                  <div className="space-y-1.5 p-3 bg-muted/50 rounded-lg border border-border/60">
+                    <Label className="text-[11px] text-muted-foreground">Video Target Bitrate</Label>
                     <Input
                       value={video.bitrate}
                       onChange={(e) =>
                         dispatch(updateVideoSettings({ bitrate: e.target.value }))
                       }
                       placeholder="4M or 4000k"
-                      className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800"
+                      className="h-8 text-xs font-mono bg-muted border-border"
                     />
                   </div>
                 )}
@@ -267,8 +267,8 @@ export default function VideoPanel() {
               {video.codec === "libx264" || video.codec === "libx265" ? (
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1.5">
-                    <Gauge className="w-3.5 h-3.5 text-zinc-400" />
-                    <Label className="text-[11px] text-zinc-400">Encoder Preset (Speed / Efficiency)</Label>
+                    <Gauge className="w-3.5 h-3.5 text-muted-foreground" />
+                    <Label className="text-[11px] text-muted-foreground">Encoder Preset (Speed / Efficiency)</Label>
                   </div>
                   <Select
                     value={video.preset}
@@ -278,10 +278,10 @@ export default function VideoPanel() {
                       }
                     }}
                   >
-                    <SelectTrigger className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800">
+                    <SelectTrigger className="h-8 text-xs font-mono bg-muted border-border">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-zinc-800 text-xs font-mono">
+                    <SelectContent className="bg-muted border-border text-xs font-mono">
                       {presetOptions.map((p) => (
                         <SelectItem key={p} value={p}>
                           {p}
@@ -294,8 +294,8 @@ export default function VideoPanel() {
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
-                      <Cpu className="w-3.5 h-3.5 text-zinc-400" />
-                      <Label className="text-[11px] text-zinc-400">CPU Usage Level (cpu-used)</Label>
+                      <Cpu className="w-3.5 h-3.5 text-muted-foreground" />
+                      <Label className="text-[11px] text-muted-foreground">CPU Usage Level (cpu-used)</Label>
                     </div>
                     <span className="text-primary font-bold">{video.cpuUsed}</span>
                   </div>
@@ -316,7 +316,7 @@ export default function VideoPanel() {
               {/* Resolution & FPS */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label className="text-[11px] text-zinc-400">Resolution Scale</Label>
+                  <Label className="text-[11px] text-muted-foreground">Resolution Scale</Label>
                   <Select
                     value={video.resolutionHeight === null ? "original" : video.resolutionHeight.toString()}
                     onValueChange={(val) => {
@@ -329,10 +329,10 @@ export default function VideoPanel() {
                       }
                     }}
                   >
-                    <SelectTrigger className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800">
+                    <SelectTrigger className="h-8 text-xs font-mono bg-muted border-border">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-zinc-800 text-xs font-mono">
+                    <SelectContent className="bg-muted border-border text-xs font-mono">
                       {resolutionOptions.map((opt) => (
                         <SelectItem
                           key={opt.label}
@@ -346,7 +346,7 @@ export default function VideoPanel() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-[11px] text-zinc-400">Frame Rate Override</Label>
+                  <Label className="text-[11px] text-muted-foreground">Frame Rate Override</Label>
                   <Select
                     value={video.fps === null ? "original" : video.fps.toString()}
                     onValueChange={(val) => {
@@ -359,10 +359,10 @@ export default function VideoPanel() {
                       }
                     }}
                   >
-                    <SelectTrigger className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800">
+                    <SelectTrigger className="h-8 text-xs font-mono bg-muted border-border">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-zinc-800 text-xs font-mono">
+                    <SelectContent className="bg-muted border-border text-xs font-mono">
                       {fpsOptions.map((opt) => (
                         <SelectItem
                           key={opt.label}
@@ -377,12 +377,12 @@ export default function VideoPanel() {
               </div>
 
               {/* Web Optimized Toggle */}
-              <div className="flex items-center justify-between p-3 bg-zinc-900/60 border border-zinc-800 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-muted/60 border border-border rounded-lg">
                 <div className="flex items-center gap-2">
                   <Globe className="w-4 h-4 text-primary" />
                   <div>
-                    <Label className="text-xs font-semibold text-zinc-200">Web Optimization</Label>
-                    <p className="text-[10px] text-zinc-500 font-sans">
+                    <Label className="text-xs font-semibold text-foreground">Web Optimization</Label>
+                    <p className="text-[10px] text-muted-foreground font-sans">
                       Applies yuv420p chroma subsampling, faststart moov flags, and Apple compatibility tags.
                     </p>
                   </div>

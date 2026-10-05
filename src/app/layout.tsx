@@ -4,6 +4,7 @@ import { monotonFont, proFont } from "./fonts";
 import ReduxProvider from "@/store/ReduxProvider";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
+import React from "react";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 

@@ -29,7 +29,7 @@ export function TrimPanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Scissors className="w-4 h-4 text-primary" />
-          <Label className="text-sm font-semibold text-zinc-200">
+          <Label className="text-sm font-semibold text-foreground">
             Trim Clip
           </Label>
         </div>
@@ -43,46 +43,46 @@ export function TrimPanel() {
       </div>
 
       {isMultipleInputs && (
-        <p className="text-xs text-amber-400/90 font-mono">
+        <p className="text-xs text-accent-foreground/90 font-mono">
           Trim is disabled when multiple files are in the batch.
         </p>
       )}
 
       {settings.trim.enabled && (
-        <div className="space-y-3 pt-1 border-t border-zinc-800/60 font-mono text-xs">
+        <div className="space-y-3 pt-1 border-t border-border/60 font-mono text-xs">
           {durationSec != null && (
-            <div className="flex items-center gap-1.5 text-zinc-400 text-[11px]">
-              <Clock className="w-3.5 h-3.5 text-zinc-500" />
+            <div className="flex items-center gap-1.5 text-muted-foreground text-[11px]">
+              <Clock className="w-3.5 h-3.5 text-muted-foreground" />
               <span>Source Duration: {durationSec.toFixed(2)}s</span>
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-[11px] text-zinc-400">Start Time</Label>
+              <Label className="text-[11px] text-muted-foreground">Start Time</Label>
               <Input
                 value={settings.trim.start}
                 onChange={(e) =>
                   dispatch(updateTrimSettings({ start: e.target.value }))
                 }
                 placeholder="0 or 00:00:00"
-                className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800"
+                className="h-8 text-xs font-mono bg-muted border-border"
               />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-[11px] text-zinc-400">End Time</Label>
+              <Label className="text-[11px] text-muted-foreground">End Time</Label>
               <Input
                 value={settings.trim.end}
                 onChange={(e) =>
                   dispatch(updateTrimSettings({ end: e.target.value }))
                 }
                 placeholder="10 or 00:00:10"
-                className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800"
+                className="h-8 text-xs font-mono bg-muted border-border"
               />
             </div>
           </div>
-          <p className="text-[10px] text-zinc-500">
+          <p className="text-[10px] text-muted-foreground">
             Accepts seconds (e.g. 5.5) or timestamp formats (HH:MM:SS.mmm).
           </p>
         </div>

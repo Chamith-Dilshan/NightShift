@@ -85,19 +85,19 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-zinc-100 flex flex-col font-sans selection:bg-primary/30">
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/30">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/80 px-6 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-md border-b border-border/80 px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link
             href="/video"
-            className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-white transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
             <span>Back to Video Studio</span>
           </Link>
-          <div className="h-4 w-px bg-zinc-800" />
-          <span className="font-bold text-sm tracking-wide text-zinc-100">
+          <div className="h-4 w-px bg-muted" />
+          <span className="font-bold text-sm tracking-wide text-foreground">
             System &amp; Tool Settings
           </span>
         </div>
@@ -107,7 +107,7 @@ export default function SettingsPage() {
           variant="outline"
           onClick={() => dispatch(fetchToolStatus())}
           disabled={loading}
-          className="h-8 text-xs font-mono border-zinc-800 hover:bg-zinc-800 text-zinc-300"
+          className="h-8 text-xs font-mono border-border hover:bg-muted text-foreground"
         >
           <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
           Refresh Status
@@ -115,26 +115,26 @@ export default function SettingsPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-4xl w-full mx-auto p-6 space-y-6">
+      <main className="flex-1 max-w-4xl w-full mx-auto my-6 p-6 space-y-6 bg-background/80 backdrop-blur-md border border-border/80">
         {/* Tools Configuration */}
         <PanelBlock title="Binary Environment & Codec Engines">
           <div className="space-y-4 font-mono text-xs">
             {status.map((tool) => (
               <div
                 key={tool.tool}
-                className="p-4 bg-zinc-900/60 border border-zinc-800 rounded-xl space-y-3"
+                className="p-4 bg-muted/60 border border-border rounded-xl space-y-3"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Wrench className="w-4 h-4 text-primary" />
-                    <span className="font-bold text-sm text-zinc-200 uppercase">
+                    <span className="font-bold text-sm text-foreground uppercase">
                       {tool.tool}
                     </span>
                     <span
                       className={`text-[10px] px-2 py-0.5 rounded border capitalize ${
                         tool.source === "missing"
-                          ? "bg-red-950/40 border-red-800/50 text-red-400"
-                          : "bg-green-950/40 border-green-800/50 text-green-400"
+                          ? "bg-destructive/10 border-destructive/50 text-destructive"
+                          : "bg-primary/10 border-primary/50 text-primary"
                       }`}
                     >
                       {tool.source}
@@ -146,14 +146,14 @@ export default function SettingsPage() {
                       size="sm"
                       variant="outline"
                       onClick={() => handlePickCustomPath(tool.tool)}
-                      className="h-7 text-xs border-zinc-700 hover:bg-zinc-800 text-zinc-300"
+                      className="h-7 text-xs border-border hover:bg-muted text-foreground"
                     >
                       <FolderOpen className="w-3 h-3 mr-1" /> Custom Path
                     </Button>
                     <Link href="/setup">
                       <Button
                         size="sm"
-                        className="h-7 text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
+                        className="h-7 text-xs bg-muted hover:bg-muted-foreground/20 text-foreground"
                       >
                         <DownloadCloud className="w-3 h-3 mr-1" /> Reinstall
                       </Button>
@@ -161,15 +161,15 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-1 text-zinc-400 text-[11px]">
+                <div className="space-y-1 text-muted-foreground text-[11px]">
                   <p>
-                    <span className="text-zinc-500">Resolved Path: </span>
-                    <span className="text-zinc-300">{tool.path || "(Not found)"}</span>
+                    <span className="text-muted-foreground">Resolved Path: </span>
+                    <span className="text-foreground">{tool.path || "(Not found)"}</span>
                   </p>
                   {tool.version && (
                     <p className="truncate">
-                      <span className="text-zinc-500">Version: </span>
-                      <span className="text-zinc-300">{tool.version}</span>
+                      <span className="text-muted-foreground">Version: </span>
+                      <span className="text-foreground">{tool.version}</span>
                     </p>
                   )}
                 </div>
@@ -177,47 +177,47 @@ export default function SettingsPage() {
             ))}
 
             {/* Capabilities Summary */}
-            <div className="p-4 bg-zinc-900/40 border border-zinc-800/80 rounded-xl space-y-3">
+            <div className="p-4 bg-muted/40 border border-border/80 rounded-xl space-y-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-primary" />
-                <span className="font-semibold text-zinc-200">
+                <span className="font-semibold text-foreground">
                   Detected Hardware / Codec Capabilities
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-[11px]">
                 <div className="space-y-1.5">
-                  <span className="text-zinc-400 font-semibold">Video Encoders:</span>
+                  <span className="text-muted-foreground font-semibold">Video Encoders:</span>
                   <div className="flex flex-wrap gap-1">
                     {capabilities.videoEncoders.length > 0 ? (
                       capabilities.videoEncoders.map((enc) => (
                         <span
                           key={enc}
-                          className="bg-zinc-800/80 text-zinc-300 px-2 py-0.5 rounded border border-zinc-700/60"
+                          className="bg-muted/80 text-foreground px-2 py-0.5 rounded border border-border/60"
                         >
                           {enc}
                         </span>
                       ))
                     ) : (
-                      <span className="text-zinc-500 italic">None detected</span>
+                      <span className="text-muted-foreground italic">None detected</span>
                     )}
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <span className="text-zinc-400 font-semibold">Audio Encoders:</span>
+                  <span className="text-muted-foreground font-semibold">Audio Encoders:</span>
                   <div className="flex flex-wrap gap-1">
                     {capabilities.audioEncoders.length > 0 ? (
                       capabilities.audioEncoders.map((enc) => (
                         <span
                           key={enc}
-                          className="bg-zinc-800/80 text-zinc-300 px-2 py-0.5 rounded border border-zinc-700/60"
+                          className="bg-muted/80 text-foreground px-2 py-0.5 rounded border border-border/60"
                         >
                           {enc}
                         </span>
                       ))
                     ) : (
-                      <span className="text-zinc-500 italic">None detected</span>
+                      <span className="text-muted-foreground italic">None detected</span>
                     )}
                   </div>
                 </div>
@@ -230,8 +230,8 @@ export default function SettingsPage() {
         <PanelBlock title="Application Updates">
           <div className="flex items-center justify-between p-2 font-mono text-xs">
             <div>
-              <p className="text-sm font-semibold text-zinc-200">NightShift Desktop</p>
-              <p className="text-xs text-zinc-400">Current Release: v0.1.0</p>
+              <p className="text-sm font-semibold text-foreground">NightShift Desktop</p>
+              <p className="text-xs text-muted-foreground">Current Release: v0.1.0</p>
               {updaterMsg && (
                 <p className="text-[11px] text-primary mt-1 font-medium">{updaterMsg}</p>
               )}

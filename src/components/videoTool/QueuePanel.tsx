@@ -56,7 +56,7 @@ export function QueuePanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ListOrdered className="w-4 h-4 text-primary" />
-          <LabelText className="text-sm font-semibold text-zinc-200">
+          <LabelText className="text-sm font-semibold text-foreground">
             Batch Queue ({jobList.length})
           </LabelText>
         </div>
@@ -91,7 +91,7 @@ export function QueuePanel() {
                 dispatch(clearAllJobs());
                 logStore.clearAll();
               }}
-              className="h-7 px-2 text-xs text-zinc-400 hover:text-red-400 font-mono"
+              className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive font-mono"
             >
               <Trash2 className="w-3.5 h-3.5 mr-1" /> Clear
             </Button>
@@ -100,7 +100,7 @@ export function QueuePanel() {
       </div>
 
       {jobList.length === 0 ? (
-        <div className="p-8 text-center border border-dashed border-zinc-800 rounded-xl bg-zinc-900/20 font-mono text-xs text-zinc-500">
+        <div className="p-8 text-center border border-dashed border-border rounded-xl bg-muted/20 font-mono text-xs text-muted-foreground">
           No jobs in queue. Configure your settings and click &quot;Add & Run Queue&quot;.
         </div>
       ) : (
@@ -118,10 +118,10 @@ export function QueuePanel() {
                   isRunning
                     ? "bg-primary/5 border-primary/50 shadow-sm"
                     : isDone
-                    ? "bg-zinc-900/60 border-green-900/40"
+                    ? "bg-muted/60 border-primary/40"
                     : isFailed
-                    ? "bg-red-950/20 border-red-900/40"
-                    : "bg-zinc-900/40 border-zinc-800/80"
+                    ? "bg-destructive/10 border-destructive/40"
+                    : "bg-muted/40 border-border/80"
                 }`}
               >
                 <div className="flex items-center justify-between gap-3 mb-2">
@@ -129,18 +129,18 @@ export function QueuePanel() {
                     {isRunning ? (
                       <Loader2 className="w-4 h-4 text-primary animate-spin shrink-0" />
                     ) : isDone ? (
-                      <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
                     ) : isFailed ? (
-                      <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                      <AlertCircle className="w-4 h-4 text-destructive shrink-0" />
                     ) : (
-                      <div className="w-2 h-2 rounded-full bg-zinc-600 shrink-0 ml-1" />
+                      <div className="w-2 h-2 rounded-full bg-muted-foreground/20 shrink-0 ml-1" />
                     )}
 
                     <div className="truncate">
-                      <p className="text-xs font-semibold text-zinc-200 truncate">
+                      <p className="text-xs font-semibold text-foreground truncate">
                         {job.outputPath.split(/[\\/]/).pop() || job.outputPath}
                       </p>
-                      <p className="text-[10px] text-zinc-500 truncate">
+                      <p className="text-[10px] text-muted-foreground truncate">
                         From: {job.inputPath.split(/[\\/]/).pop() || job.inputPath}
                       </p>
                     </div>
@@ -151,7 +151,7 @@ export function QueuePanel() {
                       variant="ghost"
                       size="sm"
                       onClick={() => setSelectedLogJobId(job.id)}
-                      className="h-6 px-1.5 text-[10px] text-zinc-400 hover:text-zinc-200"
+                      className="h-6 px-1.5 text-[10px] text-muted-foreground hover:text-foreground"
                       title="View Process Log"
                     >
                       <Terminal className="w-3 h-3 mr-1" /> Log
@@ -162,7 +162,7 @@ export function QueuePanel() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleReveal(job.outputPath)}
-                        className="h-6 px-1.5 text-[10px] text-zinc-400 hover:text-zinc-200"
+                        className="h-6 px-1.5 text-[10px] text-muted-foreground hover:text-foreground"
                         title="Reveal in folder"
                       >
                         <FolderOpen className="w-3 h-3 mr-1" /> Reveal
@@ -174,7 +174,7 @@ export function QueuePanel() {
                         variant="ghost"
                         size="sm"
                         onClick={() => dispatch(cancelJobThunk(job.id))}
-                        className="h-6 px-1.5 text-[10px] text-red-400 hover:text-red-300"
+                        className="h-6 px-1.5 text-[10px] text-destructive hover:text-destructive"
                       >
                         Cancel
                       </Button>
@@ -199,7 +199,7 @@ export function QueuePanel() {
                         variant="ghost"
                         size="icon"
                         onClick={() => dispatch(removeJob(job.id))}
-                        className="h-6 w-6 text-zinc-500 hover:text-red-400"
+                        className="h-6 w-6 text-muted-foreground hover:text-destructive"
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
@@ -209,22 +209,22 @@ export function QueuePanel() {
 
                 {/* Progress bar and statistics */}
                 <div className="space-y-1">
-                  <div className="w-full bg-zinc-800/80 h-1.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-muted/80 h-1.5 rounded-full overflow-hidden">
                     <div
                       className={`h-full transition-all duration-200 ${
                         isDone
-                          ? "bg-green-500"
+                          ? "bg-primary"
                           : isFailed
-                          ? "bg-red-500"
+                          ? "bg-destructive"
                           : isCancelled
-                          ? "bg-yellow-500"
+                          ? "bg-accent"
                           : "bg-primary"
                       }`}
                       style={{ width: `${job.percent.toFixed(1)}%` }}
                     />
                   </div>
 
-                  <div className="flex justify-between text-[10px] text-zinc-500">
+                  <div className="flex justify-between text-[10px] text-muted-foreground">
                     <span>
                       {isRunning
                         ? `Encoding: ${job.percent.toFixed(1)}%`
@@ -247,7 +247,7 @@ export function QueuePanel() {
                   </div>
 
                   {job.errorSummary && (
-                    <p className="text-[10px] text-red-400 truncate pt-0.5">
+                    <p className="text-[10px] text-destructive truncate pt-0.5">
                       {job.errorSummary}
                     </p>
                   )}
@@ -261,9 +261,9 @@ export function QueuePanel() {
       {/* Log modal for individual job */}
       {selectedLogJobId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <Card className="flex flex-col w-full max-w-3xl h-[70vh] bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden font-mono text-xs">
-            <div className="flex items-center justify-between px-4 py-3 bg-zinc-900 border-b border-zinc-800">
-              <span className="font-semibold text-zinc-200">
+          <Card className="flex flex-col w-full max-w-3xl h-[70vh] bg-card border border-border rounded-2xl overflow-hidden font-mono text-xs">
+            <div className="flex items-center justify-between px-4 py-3 bg-muted border-b border-border">
+              <span className="font-semibold text-foreground">
                 Log Output — {selectedLogJobId}
               </span>
               <Button
@@ -277,21 +277,21 @@ export function QueuePanel() {
             </div>
 
             <div
-              className="flex-1 p-4 overflow-y-auto space-y-1 text-zinc-300 leading-relaxed select-text"
-              style={{ scrollbarWidth: "thin", scrollbarColor: "#3f3f46 transparent" }}
+              className="flex-1 p-4 overflow-y-auto space-y-1 text-foreground leading-relaxed select-text"
+              style={{ scrollbarWidth: "thin", scrollbarColor: "var(--border) transparent" }}
             >
               {selectedJobLogs.length === 0 ? (
-                <p className="text-zinc-600 italic">No log entries recorded for this job yet.</p>
+                <p className="text-muted-foreground/70 italic">No log entries recorded for this job yet.</p>
               ) : (
                 selectedJobLogs.map((entry, idx) => (
                   <div
                     key={idx}
                     className={`whitespace-pre-wrap break-all ${
                       entry.stream === "stderr"
-                        ? "text-red-400"
+                        ? "text-destructive"
                         : entry.stream === "system"
-                        ? "text-blue-400"
-                        : "text-zinc-300"
+                        ? "text-secondary-foreground"
+                        : "text-foreground"
                     }`}
                   >
                     {entry.text}

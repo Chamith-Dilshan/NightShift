@@ -72,7 +72,7 @@ export default function WatermarkPanel() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ImageIcon className="w-4 h-4 text-primary" />
-          <Label className="text-sm font-semibold text-zinc-200">
+          <Label className="text-sm font-semibold text-foreground">
             Watermark Overlay
           </Label>
         </div>
@@ -85,20 +85,20 @@ export default function WatermarkPanel() {
       </div>
 
       {watermark.enabled && (
-        <div className="space-y-4 pt-1 border-t border-zinc-800/60 font-mono text-xs">
+        <div className="space-y-4 pt-1 border-t border-border/60 font-mono text-xs">
           {/* File Picker */}
           <div className="space-y-1.5">
-            <Label className="text-[11px] text-zinc-400">Watermark Image</Label>
+            <Label className="text-[11px] text-muted-foreground">Watermark Image</Label>
             <div className="flex gap-2">
               <Input
                 readOnly
                 value={watermark.filePath || "No image selected"}
-                className="h-8 text-xs font-mono bg-zinc-900 border-zinc-800 text-zinc-300"
+                className="h-8 text-xs font-mono bg-muted border-border text-foreground"
               />
               <Button
                 size="sm"
                 onClick={pickWatermark}
-                className="h-8 px-3 text-xs bg-zinc-800 hover:bg-zinc-700 text-zinc-200 shrink-0"
+                className="h-8 px-3 text-xs bg-muted hover:bg-muted-foreground/20 text-foreground shrink-0"
               >
                 <FolderOpen className="w-3.5 h-3.5 mr-1" /> Browse
               </Button>
@@ -109,7 +109,7 @@ export default function WatermarkPanel() {
                   onClick={() =>
                     dispatch(updateWatermarkSettings({ filePath: null }))
                   }
-                  className="h-8 w-8 text-zinc-400 hover:text-red-400"
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
                 >
                   <X className="w-4 h-4" />
                 </Button>
@@ -120,7 +120,7 @@ export default function WatermarkPanel() {
           {/* 9-Point Anchor Grid & Controls */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-[11px] text-zinc-400">Anchor Position</Label>
+              <Label className="text-[11px] text-muted-foreground">Anchor Position</Label>
               <div className="grid grid-cols-3 gap-1.5 max-w-[150px]">
                 {anchors.map((a) => (
                   <Button
@@ -141,7 +141,7 @@ export default function WatermarkPanel() {
 
             <div className="space-y-3">
               <div className="space-y-1">
-                <div className="flex justify-between text-zinc-400">
+                <div className="flex justify-between text-muted-foreground">
                   <span>Margin</span>
                   <span className="text-primary font-bold">{watermark.margin}px</span>
                 </div>
@@ -159,7 +159,7 @@ export default function WatermarkPanel() {
               </div>
 
               <div className="space-y-1">
-                <div className="flex justify-between text-zinc-400">
+                <div className="flex justify-between text-muted-foreground">
                   <span>Opacity</span>
                   <span className="text-primary font-bold">
                     {Math.round(watermark.opacity * 100)}%
