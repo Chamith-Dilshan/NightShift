@@ -1,29 +1,23 @@
 <div align="center">
 
-<img src="public/app-icon.png" alt="NightShift Logo" width="240" height="240" onerror="this.src='https://raw.githubusercontent.com/akehito/NightShift/main/public/favicon.ico'; this.width=96; this.height=96;" />
+<img src="public/app-icon.png" alt="NightShift Logo" width="240" height="240" />
 
 # ⚡ NIGHTSHIFT
 
-**The Ultimate Desktop Studio for CMD Tools**
+**A desktop workbench for command-line tools.**
 
-*Engineered with Tauri v2, Next.js, Redux Toolkit, and a Native Rust Execution Engine.*
+Pick the tools you need, run them through visual forms or raw commands, save what you do as templates, and batch it across files.
 
-[![Release](https://img.shields.io/github/v/release/akehito/NightShift?color=black&label=release)](https://github.com/akehito/NightShift/releases)
+*Built with Tauri v2, Next.js, Redux Toolkit and a native Rust execution engine.*
+
+[![Release](https://img.shields.io/github/v/release/Chamith-Dilshan/NightShift?color=black&label=release)](https://github.com/Chamith-Dilshan/NightShift/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
 [![Tauri v2](https://img.shields.io/badge/Tauri-v2-black?logo=tauri)](https://v2.tauri.app)
 [![Rust](https://img.shields.io/badge/Rust-black?logo=rust)](https://www.rust-lang.org)
 [![Next.js](https://img.shields.io/badge/Next.js_App_Router-black?logo=next.js)](https://nextjs.org)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)]()
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)](https://github.com/Chamith-Dilshan/NightShift/releases)
 
-<br />
-
-[**Key Features**](#-key-features) •
-[**Demo Video**](#-demo-preview) •
-[**Architecture**](#-architecture--data-flow) •
-[**Quick Start**](#-quick-start) •
-[**Tool Manager**](#-zero-bloat-binary-manager) •
-[**Contributing**](CONTRIBUTING.md) •
-[**Security**](SECURITY.md)
+[**Overview**](#-overview) • [**Status**](#-status) • [**Features**](#-features-today) • [**Quick Start**](#-quick-start) • [**Tools**](#-tools-are-never-bundled) • [**Roadmap**](#-roadmap) • [**Contributing**](CONTRIBUTING.md) • [**Security**](SECURITY.md)
 
 </div>
 
@@ -31,225 +25,206 @@
 
 ## 🌌 Overview
 
-**NightShift** is a high-performance desktop media processing studio designed to give creators, developers, and power users surgical precision over FFmpeg operations without fighting cryptic command-line flags. 
+Command-line tools are some of the most powerful software around, but their options are scattered, easy to forget, and awkward to reuse. **NightShift gives them one home.**
 
-Built on a triple-layer stack combining **Tauri v2**, a **static Next.js 16 App Router UI**, and a **custom multithreaded Rust streaming runner**, NightShift delivers zero-sidecar bloat, instant launch times, unbuffered log streaming, and deterministic batch execution.
+1. **Pick** the tools you want. NightShift helps you install or locate them.
+2. **Configure** them through a visual form, or write the command yourself. The exact command is always visible and editable.
+3. **Run** with live logs, progress, cancel, and clear errors.
+4. **Save** a configuration as a reusable template.
+5. **Batch** it across many files.
+
+NightShift is **not** a graphical editor and has no media preview. It builds and runs commands; it does not hide them.
+
+**FFmpeg is the first tool**, and it is an example, not the identity of the project. NightShift is being built as a platform where each tool is described by a declarative spec, so more tools can be added without rewriting the app (see the [roadmap](#-roadmap)).
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                             NIGHTSHIFT STUDIO                               │
-│  [Input Media] ──> [Deterministic Redux Builder] ──> [Rust Async Engine]    │
-│                           │                                  │              │
-│                     Validated State                  Raw Unbuffered Pipe    │
-│                           │                                  │              │
-│                     Live FFmpeg Arg                 FFmpeg / FFprobe Spawn  │
-│                           ▼                                  ▼              │
-│                    [Studio Output] <─── [Real-Time Log & Progress Stream]   │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────┐
+│                               NIGHTSHIFT                                 │
+│                                                                          │
+│   Tool  ──>  Visual form / raw command  ──>  Exact command preview       │
+│                         │                            │                   │
+│                  Validated settings          Native Rust runner          │
+│                         │                    (no shell, argv only)       │
+│                         ▼                            ▼                   │
+│               Templates · Batch  <───  Live logs · progress · exit code  │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🎬 Demo Preview
+## 📍 Status
 
-<div align="center">
+| | |
+|---|---|
+| **Released** | **v0.1**, the FFmpeg release (video tool, native runner, tool manager, templates, queue) |
+| **In planning** | **v0.2**, the platform core (tool specs, tool catalog, libvips, shareable templates, folder batches) |
+| **Not yet available** | Anything listed under [Roadmap](#-roadmap) as planned |
 
-<!-- DEMO VIDEO / GIF CONTAINER -->
-<a href="https://github.com/akehito/NightShift/raw/main/.github/assets/demo.mp4">
-  <img src=".github/assets/project_demo.gif" alt="NightShift Demo Video" width="850" onerror="this.src='https://placehold.co/850x480/0f172a/38bdf8?text=▶+Watch+NightShift+In+Action+(Click+to+Play+Demo)&font=Montserrat';" />
-</a>
-
-<p><em>Demo video to see it in action.</em></p>
-
-</div>
-
-> **💡 Video Asset Placement Note:** Demo videos should be placed in `.github/assets/demo.mp4` or hosted via [GitHub Release Assets](https://github.com/akehito/NightShift/releases) so that the raw video files are **never** bundled into the compiled Tauri application installer binaries!
+Features below are marked **available** or **planned** so nothing is promised that is not shipped.
 
 ---
 
-## ✨ Key Features
+## ✨ Features (today)
 
-### 🎛️ Precision Video Studio (`/video`)
-- **Container Mastery:** Native presets and container validations for `MP4`, `WebM`, `GIF`, and custom file targets.
-- **Microsecond Trimming:** Non-destructive duration trimming using input-seeking `-ss` and `-to` before `-i` for instantaneous cut points.
-- **Canvas Cropping:** Interactive boundary and centering controls (`crop=w:h:x:y`) with strict validation against frame dimension overflows.
-- **GOP & Keyframe Surgery:** Fine-tune GOP (Group of Pictures) keyframe intervals, including single-frame **All-Intra** (`-g 1`) mode for instantaneous web video scrub performance.
-- **Web Optimization Pipeline:** Automated `+faststart` moov-atom placement, `yuv420p` pixel format normalization, and Apple QuickTime compatibility tags (`-tag:v hvc1`).
-- **9-Point Watermark Grid:** Drag-and-drop image overlay with margin calibration, opacity sliders, and position anchoring.
-- **Hardware Acceleration:** Auto-probes local GPU encoders (`libx264`, `libx265`, `libvpx-vp9`, `libaom-av1`, `aac`, `opus`, `flac`) and disables incompatible codecs on the fly.
+### 🎬 FFmpeg video tool (available in v0.1)
 
-### ⚡ Deterministic Command Generation
-- **Pure Function State Builders:** CLI argument arrays are constructed purely and deterministically from Redux state without UI side-effects.
-- **Interactive Syntax Mirror:** Real-time editable and copyable terminal command preview to inspect generated arguments before execution.
-- **Live Stream Logs:** Unbuffered UTF-8 and carriage-return line splitting (`line_splitter.rs`) captures frame rates, speed factors, bitrates, and timecodes.
+- **Containers:** MP4, WebM, GIF and custom output targets, with codec compatibility handled for you (your selection is kept when you switch containers and back).
+- **Per-codec rules:** H.264, H.265, VP9 and AV1 each get the right rate control, speed and pixel-format arguments instead of one-size-fits-all flags.
+- **Trim:** start/end with input-side seeking (`-ss` / `-to` before `-i`).
+- **Crop:** width, height and optional offsets, validated against the probed source dimensions.
+- **Keyframes:** set the GOP interval, including all-intra (`-g 1`) for smooth scrubbing of scroll-driven web video.
+- **Web optimization:** `yuv420p`, `+faststart`, and `hvc1` tagging for H.265 in MP4.
+- **Remove audio**, rate control (CRF or bitrate), resolution and frame-rate controls.
+- **Filters and transforms:** grayscale, blur, sharpen, saturation, rotate, flip.
+- **Watermark:** image overlay with a 9-point anchor grid, margin and opacity.
+- **Encoder detection:** checks your FFmpeg build and disables codecs it does not include.
 
-### 📦 Batch Processing Queue
-- **Sequential Pipeline:** Queue dozens of files with independent encoding profiles.
-- **Active Task Monitoring:** Real-time log inspector, cancellation triggers, error retries, and instant OS folder reveal (`explorer` / `Finder` / `xdg-open`).
-- **Disk-Backed Template Manager:** Save, load, rename, import, and export reusable parameter configurations stored safely on the local filesystem.
+### ⚡ Command generation (available)
 
----
+- **Deterministic:** command arguments are built by a pure function from your settings, with no UI side effects.
+- **Visible and editable:** the live command preview can be copied or edited by hand (manual mode), then reset back to the form.
+- **Validation before running:** invalid combinations are blocked with an explanation.
+- **Live logs:** structured progress, speed and timecode from the native runner, correct exit codes, and cancel.
 
-## 📊 Comparison Matrix
+### 📦 Queue and templates (available)
 
-| Feature / Metric | **NightShift** ⚡ | HandBrake 🐢 | Electron Wrappers 🐌 | Raw CLI 💻 |
-| :--- | :---: | :---: | :---: | :---: |
-| **Engine Architecture** | **Native Rust (Tauri v2)** | C / GTK / WX | Node.js + Chromium | Pure Shell |
-| **RAM Footprint (Idle)** | **< 20 MB** | ~180 MB | > 450 MB | 0 MB |
-| **Installer Size** | **< 15 MB** | ~40 MB | > 120 MB | N/A |
-| **Sidecar / Python Bloat** | **Zero (Native Rust)** | None | Heavy | None |
-| **Live Unbuffered Logs** | ✅ **Real-Time Stream** | ⚠️ Text Log | ⚠️ Polled Buffer | ✅ Direct stdout |
-| **Web Scrubbing (All-Intra)**| ✅ **1-Click GOP Preset** | ❌ Manual Flags | ❌ Rare | ⚠️ Complex `-g` args |
-| **Interactive Crop & Grid**| ✅ **Visual Overlay** | ⚠️ Basic Box | ⚠️ Partial | ❌ Math calculation |
-| **Binary Freedom** | ✅ **System or On-Demand** | Bundled | Bundled | User-installed |
+- **Sequential queue:** one job per input file, with per-job progress, cancel, retry and "reveal in folder".
+- **Templates:** save, load, rename, import and export configurations, stored on disk.
+- **Built-in presets:** quick starting points such as a web MP4, a web WebM, scroll-scrub video and a small GIF.
 
 ---
 
-## 🛠️ Architecture & Data Flow
+## 🎬 Demo
 
-NightShift strictly decouples UI presentation, deterministic command compilation, and host process orchestration:
+[![NightShift Demo](.github/assets/project_demo.gif)](https://github.com/Chamith-Dilshan/NightShift/raw/main/.github/assets/demo.mp4)
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           FRONTEND (Next.js 16)                             │
-│                                                                             │
-│  ┌───────────────────────┐          ┌────────────────────────────────────┐  │
-│  │   UI Components       │          │   Redux Toolkit Store              │  │
-│  │   (Panels, Sliders)   │ ───────> │   • videoSlice   • jobsSlice       │  │
-│  └───────────────────────┘          │   • toolsSlice   • templatesSlice  │  │
-│                                     └─────────────────┬──────────────────┘  │
-│                                                       │                     │
-│                                     ┌─────────────────▼──────────────────┐  │
-│                                     │   Pure Command Builder             │  │
-│                                     │   (commandBuilder.ts)              │  │
-│                                     └─────────────────┬──────────────────┘  │
-└───────────────────────────────────────────────────────┼─────────────────────┘
-                                                        │ JSON IPC
-┌───────────────────────────────────────────────────────▼─────────────────────┐
-│                        NATIVE BACKEND (Tauri v2 / Rust)                     │
-│                                                                             │
-│  ┌───────────────────────────────────────────────────────────────────────┐  │
-│  │   Job Runner Engine (jobs.rs)                                         │  │
-│  │   • Spawns async tokio process with unbuffered stdout / stderr pipes   │  │
-│  │   • Splits lines by \n and \r for carriage-return progress updates    │  │
-│  │   • Emits structured job-log and job-progress events via Tauri IPC    │  │
-│  └───────────────────────────────────────────────────────────────────────┘  │
-│                                       │                                     │
-│                                       ▼                                     │
-│                     ┌───────────────────────────────────┐                   │
-│                     │       Host FFmpeg / FFprobe       │                   │
-│                     └───────────────────────────────────┘                   │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+*A short walkthrough of the current FFmpeg tool.*
+
+---
+
+## 🧰 Tools are never bundled
+
+NightShift does **not** ship tool binaries inside its installer. This keeps the download small and avoids redistributing other projects' software.
+
+- **Today (v0.1):** on first launch the setup wizard looks for FFmpeg and ffprobe on your system, or downloads a verified build into your user data folder. Downloads are checked against SHA-256 hashes listed in `tools-manifest.json`.
+- **Planned (v0.2):** a **tool catalog** where you choose which tools to install. For each tool you can use a managed download, detect an existing install, or point to an executable yourself. Where no download exists, NightShift shows install hints for your platform's package manager.
+
+Tools you install keep their own licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Download Pre-Built Installers
+### 1. Download an installer
 
-Official desktop release packages are published on [GitHub Releases](https://github.com/akehito/NightShift/releases):
+Packages are published on [GitHub Releases](https://github.com/Chamith-Dilshan/NightShift/releases):
 
-| Operating System | Package Format | Download Link |
-| :--- | :--- | :--- |
-| **Windows** | NSIS Installer (`.exe`) | [Download for Windows](https://github.com/akehito/NightShift/releases/latest) |
-| **macOS** | Universal Disk Image (`.dmg`) | [Download for macOS](https://github.com/akehito/NightShift/releases/latest) |
-| **Linux** | AppImage / Debian (`.deb`) | [Download for Linux](https://github.com/akehito/NightShift/releases/latest) |
+| OS | Package | Link |
+|---|---|---|
+| **Windows** | NSIS installer (`.exe`) | [Latest release](https://github.com/Chamith-Dilshan/NightShift/releases/latest) |
+| **macOS** | Disk image (`.dmg`) | [Latest release](https://github.com/Chamith-Dilshan/NightShift/releases/latest) |
+| **Linux** | AppImage / `.deb` | [Latest release](https://github.com/Chamith-Dilshan/NightShift/releases/latest) |
 
-<details>
-<summary><strong>🔓 Opening Unsigned Builds</strong></summary>
+**🔓 Opening unsigned builds**
 
-v0.1 builds are currently unsigned:
-- **Windows:** Click **More info** → **Run anyway** if Windows SmartScreen appears.
-- **macOS:** Right-click `NightShift.app` and choose **Open**, or run:
+Current builds are not code-signed:
+
+- **Windows:** if SmartScreen appears, click **More info → Run anyway**.
+- **macOS:** right-click `NightShift.app` and choose **Open**, or allow it under **System Settings → Privacy & Security → Open Anyway**, or run:
+
   ```bash
   xattr -cr /Applications/NightShift.app
   ```
-- **Linux:** Make AppImage executable: `chmod +x NightShift-*.AppImage`
-</details>
 
----
+- **Linux:** make the AppImage executable: `chmod +x NightShift-*.AppImage`
 
-### 2. Building from Source
+### 2. Build from source
 
-#### Prerequisites
-- **Node.js** `v22+` & **pnpm** `v10+`
-- **Rust** `stable` (`rustup update stable`)
-- C++ Build Tools (VS 2022 on Windows, Xcode CLI on macOS, standard WebKitGTK on Linux)
+**Prerequisites**
 
-#### Installation Steps
+- Node.js `v22+` and pnpm `v10+`
+- Rust (`stable`; run `rustup update stable`)
+- Platform build tools (Visual Studio 2022 C++ tools on Windows, Xcode Command Line Tools on macOS, WebKitGTK dependencies on Linux; see the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/))
+
+**Steps**
 
 ```bash
-# 1. Clone repository
-git clone https://github.com/akehito/NightShift.git
+git clone https://github.com/Chamith-Dilshan/NightShift.git
 cd NightShift
-
-# 2. Install dependencies
 pnpm install
 
-# 3. Run desktop application in development mode
-pnpm tauri dev
-
-# 4. (Optional) Run frontend in browser mock mode
-pnpm dev
+pnpm tauri dev   # desktop app in development mode
+pnpm tauri build   # build the desktop app
+pnpm dev         # (optional) UI in a plain browser with a mock executor
 ```
 
-#### Verification & Test Suites
+**Checks**
 
 ```bash
-# Run complete verification suite
 pnpm lint
 pnpm typecheck
-pnpm test
-cargo test --manifest-path src-tauri/Cargo.toml
+pnpm  test
+cargo fmt --manifest-path src-tauri/Cargo.toml --check
 cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
+cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
 ---
 
-## 🧰 Zero-Bloat Binary Manager
+## 🏗️ Architecture
 
-NightShift does **not** bundle heavy multi-hundred megabyte FFmpeg binaries inside its desktop installer. 
+- **Tauri v2 (Rust)** hosts the app and owns process execution: no shell, argument arrays only, structured progress parsing, cancel, and tool management.
+- **Next.js (static export)** renders the UI.
+- **Redux Toolkit** holds tool settings; a pure command builder turns them into arguments.
+- **No local web server and no sidecar.** The frontend never supplies an executable path; Rust resolves tools.
 
-Upon first launch, the **First-Run Setup Wizard (`/setup`)**:
-1. 🔍 **Scans System PATH:** Automatically locates existing FFmpeg & FFprobe installations.
-2. 📥 **Verified On-Demand Downloads:** If not found, downloads official verified static builds for your architecture directly into secure user app data (`AppData/Local` / `Application Support` / `~/.local/share`).
-3. 🔒 **Integrity Checked:** Every binary is validated against cryptographic SHA-256 hashes defined in `tools-manifest.json`.
+```
+ UI (Next.js)  ──>  Redux state  ──>  Pure command builder
+                                              │ argv
+                                              ▼
+                      Tauri (Rust): job runner · tool manager
+                                              │ spawn (no shell)
+                                              ▼
+                                   Installed command-line tools
+```
+
+Details live in [APP_ARCHITECTURE.md](APP_ARCHITECTURE.md). Long-term direction and decisions are in [PROJECT_BIBLE.md](PROJECT_BIBLE.md).
 
 ---
 
 ## 🗺️ Roadmap
 
-- [x] Native Rust streaming runner & Tauri v2 migration.
-- [x] Redux-driven pure command compilation & live terminal logs.
-- [x] Trimming, canvas cropping, watermark grid, and web GOP presets.
-- [x] Sequential batch processing queue with folder reveal.
-- [ ] Two-Pass VBR encoding pipeline with automated bitrate calculators.
-- [ ] Audio spectrum visualizer & multi-track audio extraction.
-- [ ] HDR to SDR color-space tone mapping (`tonemap_zscale`).
-- [ ] Hardware-accelerated hardware decoders (`nvenc`, `qsv`, `vaapi`, `videotoolbox`).
+**Done**
+- [x] **v0.1:** native Rust runner, FFmpeg video tool, tool manager, sequential queue, templates, installers.
+
+**Planned**
+- [ ] **v0.2, platform core:** declarative tool specs; a tool catalog; custom tools (point NightShift at any executable); **libvips** as the second tool; reusable templates you can import, export and share; batch processing over files and folders with a dry-run plan.
+- [ ] **v0.3, workflows:** chain several tools into reusable workflows (think a node graph for CLI tools), with caching and a headless command-line runner for automation.
+- [ ] **v0.4, editor and extensions:** visual workflow editor, interactive terminal, optional extensions for tools that need other runtimes.
+- [ ] **Later:** more tools (image, audio, document and forensic tools), a way to share templates and specs, and optional AI-assisted command building with your own keys or local models.
+
+**FFmpeg tool backlog:** two-pass VBR encoding, HDR-to-SDR tone mapping, hardware encoders and decoders (`nvenc`, `qsv`, `vaapi`, `videotoolbox`).
+
+The roadmap is a plan, not a promise. Priorities shift with feedback, so open an issue to tell us what you would use NightShift for.
 
 ---
 
 ## 🤝 Contributing
 
-Contributions make the open-source community thrive! Please read our [**Contributing Guide (CONTRIBUTING.md)**](CONTRIBUTING.md) for full details on branch conventions, coding guidelines, and pull request procedures.
-
----
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, branch conventions, coding guidelines and the pull request process.
 
 ## 🔒 Security
 
-For vulnerability disclosures and details on our local-first threat model, please review our [**Security Policy (SECURITY.md)**](SECURITY.md).
+For vulnerability reports and the local-first threat model, see [SECURITY.md](SECURITY.md).
+
+## 📄 License and third-party notices
+
+NightShift is released under the [MIT License](LICENSE). FFmpeg and other tools are downloaded or detected on your machine, are not distributed with NightShift, and remain under their own licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ---
 
-## 📄 License & Third-Party Notices
-
-NightShift is released under the [MIT License](LICENSE).  
-FFmpeg and other third-party tools are subject to their respective licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for details.
-
-<br />
-
 <div align="center">
-  <sub>Crafted with ⚡ for creators and developers who demand complete control over their media.</sub>
+
+Made for people who live in the terminal and are tired of remembering the flags. ⚡
+
 </div>
