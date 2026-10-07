@@ -8,10 +8,10 @@
 
 Pick the tools you need, run them through visual forms or raw commands, save what you do as templates, and batch it across files.
 
-*Built with Tauri v2, Next.js, Redux Toolkit and a native Rust execution engine.*
+*Built with Tauri v2, Next.js, Redux Toolkit, and a native Rust execution engine.*
 
 [![Release](https://img.shields.io/github/v/release/Chamith-Dilshan/NightShift?color=black&label=release)](https://github.com/Chamith-Dilshan/NightShift/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-black.svg)](LICENSE)
 [![Tauri v2](https://img.shields.io/badge/Tauri-v2-black?logo=tauri)](https://v2.tauri.app)
 [![Rust](https://img.shields.io/badge/Rust-black?logo=rust)](https://www.rust-lang.org)
 [![Next.js](https://img.shields.io/badge/Next.js_App_Router-black?logo=next.js)](https://nextjs.org)
@@ -69,14 +69,14 @@ Features below are marked **available** or **planned** so nothing is promised th
 ### 🎬 FFmpeg video tool (available in v0.1)
 
 - **Containers:** MP4, WebM, GIF and custom output targets, with codec compatibility handled for you (your selection is kept when you switch containers and back).
-- **Per-codec rules:** H.264, H.265, VP9 and AV1 each get the right rate control, speed and pixel-format arguments instead of one-size-fits-all flags.
+- **Per-codec rules:** H.264, H.265, VP9, and AV1 each get the right rate control, speed and pixel-format arguments instead of one-size-fits-all flags.
 - **Trim:** start/end with input-side seeking (`-ss` / `-to` before `-i`).
-- **Crop:** width, height and optional offsets, validated against the probed source dimensions.
+- **Crop:** width, height, and optional offsets, validated against the probed source dimensions.
 - **Keyframes:** set the GOP interval, including all-intra (`-g 1`) for smooth scrubbing of scroll-driven web video.
 - **Web optimization:** `yuv420p`, `+faststart`, and `hvc1` tagging for H.265 in MP4.
 - **Remove audio**, rate control (CRF or bitrate), resolution and frame-rate controls.
 - **Filters and transforms:** grayscale, blur, sharpen, saturation, rotate, flip.
-- **Watermark:** image overlay with a 9-point anchor grid, margin and opacity.
+- **Watermark:** image overlay with a 9-point anchor grid, margin, and opacity.
 - **Encoder detection:** checks your FFmpeg build and disables codecs it does not include.
 
 ### ⚡ Command generation (available)
@@ -88,9 +88,9 @@ Features below are marked **available** or **planned** so nothing is promised th
 
 ### 📦 Queue and templates (available)
 
-- **Sequential queue:** one job per input file, with per-job progress, cancel, retry and "reveal in folder".
-- **Templates:** save, load, rename, import and export configurations, stored on disk.
-- **Built-in presets:** quick starting points such as a web MP4, a web WebM, scroll-scrub video and a small GIF.
+- **Sequential queue:** one job per input file, with per-job progress, cancel, retry, and "reveal in folder".
+- **Templates:** save, load, rename, import, and export configurations, stored on disk.
+- **Built-in presets:** quick starting points such as a web MP4, a web WebM, scroll-scrub video, and a small GIF.
 
 ---
 
@@ -198,12 +198,12 @@ Details live in [APP_ARCHITECTURE.md](APP_ARCHITECTURE.md). Long-term direction 
 - [x] **v0.1:** native Rust runner, FFmpeg video tool, tool manager, sequential queue, templates, installers.
 
 **Planned**
-- [ ] **v0.2, platform core:** declarative tool specs; a tool catalog; custom tools (point NightShift at any executable); **libvips** as the second tool; reusable templates you can import, export and share; batch processing over files and folders with a dry-run plan.
+- [ ] **v0.2, platform core:** declarative tool specs; a tool catalog; custom tools (point NightShift at any executable); **libvips** as the second tool; reusable templates you can import, export, and share; batch processing over files and folders with a dry-run plan.
 - [ ] **v0.3, workflows:** chain several tools into reusable workflows (think a node graph for CLI tools), with caching and a headless command-line runner for automation.
 - [ ] **v0.4, editor and extensions:** visual workflow editor, interactive terminal, optional extensions for tools that need other runtimes.
-- [ ] **Later:** more tools (image, audio, document and forensic tools), a way to share templates and specs, and optional AI-assisted command building with your own keys or local models.
+- [ ] **Later:** more tools (image, audio, document, and forensic tools), a way to share templates and specs, and optional AI-assisted command building with your own keys or local models.
 
-**FFmpeg tool backlog:** two-pass VBR encoding, HDR-to-SDR tone mapping, hardware encoders and decoders (`nvenc`, `qsv`, `vaapi`, `videotoolbox`).
+**FFmpeg tool backlog:** two-pass VBR encoding, HDR-to-SDR tone mapping, hardware encoders, and decoders (`nvenc`, `qsv`, `vaapi`, `videotoolbox`).
 
 The roadmap is a plan, not a promise. Priorities shift with feedback, so open an issue to tell us what you would use NightShift for.
 
@@ -211,15 +211,15 @@ The roadmap is a plan, not a promise. Priorities shift with feedback, so open an
 
 ## 🤝 Contributing
 
-Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, branch conventions, coding guidelines and the pull request process.
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, branch conventions, coding guidelines, and the pull request process.
 
 ## 🔒 Security
 
 For vulnerability reports and the local-first threat model, see [SECURITY.md](SECURITY.md).
 
-## 📄 License and third-party notices
+## 📄 License, trademark and third-party notices
 
-NightShift is released under the [MIT License](LICENSE). FFmpeg and other tools are downloaded or detected on your machine, are not distributed with NightShift, and remain under their own licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+NightShift's source code is released under the [Apache License 2.0](LICENSE). FFmpeg and other tools are downloaded or detected on your machine, are not distributed with NightShift, and remain under their own licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ---
 

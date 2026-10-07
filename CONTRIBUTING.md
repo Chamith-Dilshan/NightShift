@@ -213,6 +213,12 @@ pnpm build
 
 ---
 
+## Licensing of contributions
+
+NightShift is licensed under Apache-2.0. Before your first pull request can be merged, you must agree to the [Contributor License Agreement](CLA.md). By contributing, you confirm you wrote the code (or have the right to submit it) and that it may be distributed under the project's license and relicensed by the maintainer.
+
+---
+
 ## Questions or Need Help?
 
 - **Issues:** Open a [GitHub Issue](https://github.com/akehito/NightShift/issues) for bug reports and feature requests.
