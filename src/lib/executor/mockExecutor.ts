@@ -2,7 +2,7 @@ import {
   Executor,
   JobSpec,
   JobEvent,
-  Tool,
+  ToolId,
   ToolStatus,
   Capabilities,
   InstallEvent,
@@ -158,27 +158,27 @@ export class MockExecutor implements Executor {
       };
     },
 
-    async install(tool: Tool, onEvent: (e: InstallEvent) => void): Promise<ToolStatus> {
+    async install(toolId: ToolId, onEvent: (e: InstallEvent) => void): Promise<ToolStatus> {
       onEvent({ kind: "started", totalBytes: 1000 });
       onEvent({ kind: "progress", bytes: 500, total: 1000 });
       onEvent({ kind: "verifying" });
       onEvent({ kind: "extracting" });
       const status: ToolStatus = {
-        tool,
+        tool: toolId,
         source: "managed",
-        path: `/mock/tools/${tool}/${tool}`,
-        version: `${tool} version 7.1 (mock managed)`,
+        path: `/mock/tools/${toolId}/${toolId}`,
+        version: `${toolId} version 7.1 (mock managed)`,
       };
       onEvent({ kind: "done", status });
       return status;
     },
 
-    async setCustomPath(tool: Tool, path: string): Promise<ToolStatus> {
+    async setCustomPath(toolId: ToolId, path: string): Promise<ToolStatus> {
       return {
-        tool,
+        tool: toolId,
         source: "custom",
         path,
-        version: `${tool} version 7.1 (mock custom)`,
+        version: `${toolId} version 7.1 (mock custom)`,
       };
     },
   };

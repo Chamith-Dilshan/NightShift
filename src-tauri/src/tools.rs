@@ -21,10 +21,50 @@ pub enum Tool {
     Ffprobe,
 }
 
+impl Tool {
+    pub fn id(&self) -> &'static str {
+        match self {
+            Tool::Ffmpeg => "ffmpeg",
+            Tool::Ffprobe => "ffprobe",
+        }
+    }
+}
+
+/// Generic tool identifier from spec system.
+/// Supports both legacy Tool enum and arbitrary string IDs.
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
+#[serde(untagged)]
+pub enum ToolId {
+    Legacy(Tool),
+    Spec(String),
+}
+
+impl ToolId {
+    pub fn as_str(&self) -> &str {
+        match self {
+            ToolId::Legacy(t) => t.id(),
+            ToolId::Spec(s) => s.as_str(),
+        }
+    }
+}
+
+impl From<Tool> for ToolId {
+    fn from(tool: Tool) -> Self {
+        ToolId::Legacy(tool)
+    }
+}
+
+impl From<String> for ToolId {
+    fn from(s: String) -> Self {
+        ToolId::Spec(s)
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ToolStatus {
-    pub tool: Tool,
+    #[serde(rename = "tool")]
+    pub tool_id: String,
     pub source: String, // "custom" | "managed" | "system" | "missing"
     pub path: Option<String>,
     pub version: Option<String>,
@@ -70,7 +110,7 @@ pub struct ManifestPlatform {
 }
 
 pub struct ToolManager {
-    custom_paths: Arc<Mutex<HashMap<Tool, String>>>,
+    custom_paths: Arc<Mutex<HashMap<String, String>>>,
     capabilities_cache: Arc<Mutex<HashMap<String, Capabilities>>>,
 }
 
@@ -82,50 +122,61 @@ impl ToolManager {
         }
     }
 
-    pub fn set_custom_path(&self, tool: Tool, path: String) {
+    pub fn set_custom_path(&self, tool_id: impl AsRef<str>, path: String) {
         let mut map = self.custom_paths.lock().unwrap();
-        map.insert(tool, path);
+        map.insert(tool_id.as_ref().to_string(), path);
     }
 
-    pub fn get_custom_path(&self, tool: Tool) -> Option<String> {
+    pub fn get_custom_path(&self, tool_id: impl AsRef<str>) -> Option<String> {
         let map = self.custom_paths.lock().unwrap();
-        map.get(&tool).cloned()
+        map.get(tool_id.as_ref()).cloned()
     }
 
-    pub fn resolve_tool_path(&self, app: &AppHandle, tool: Tool) -> Option<(String, String)> {
+    /// Resolve the binary name for a tool ID.
+    /// For known tools (ffmpeg, ffprobe), returns the platform-specific binary name.
+    /// For unknown tools, returns the tool ID as-is with platform extension.
+    fn binary_name(tool_id: &str) -> String {
+        let base_name = match tool_id {
+            "ffmpeg" => "ffmpeg",
+            "ffprobe" => "ffprobe",
+            other => other,
+        };
+        if cfg!(target_os = "windows") {
+            format!("{}.exe", base_name)
+        } else {
+            base_name.to_string()
+        }
+    }
+
+    /// Resolve the managed install directory name for a tool ID.
+    fn managed_tool_name(tool_id: &str) -> &str {
+        match tool_id {
+            "ffmpeg" | "ffprobe" => tool_id,
+            other => other,
+        }
+    }
+
+    pub fn resolve_tool_path(&self, app: &AppHandle, tool_id: impl AsRef<str>) -> Option<(String, String)> {
+        let tool_id = tool_id.as_ref();
+
         // 1. Custom path
-        if let Some(custom) = self.get_custom_path(tool) {
+        if let Some(custom) = self.get_custom_path(tool_id) {
             if let Ok(_ver) = check_tool_version(&custom) {
                 return Some((custom, "custom".to_string()));
             }
         }
 
         // 2. Managed install
-        if let Some(managed) = get_managed_tool_path(app, tool) {
+        if let Some(managed) = get_managed_tool_path(app, tool_id) {
             if let Ok(_ver) = check_tool_version(&managed) {
                 return Some((managed, "managed".to_string()));
             }
         }
 
         // 3. System PATH
-        let binary_name = match tool {
-            Tool::Ffmpeg => {
-                if cfg!(target_os = "windows") {
-                    "ffmpeg.exe"
-                } else {
-                    "ffmpeg"
-                }
-            }
-            Tool::Ffprobe => {
-                if cfg!(target_os = "windows") {
-                    "ffprobe.exe"
-                } else {
-                    "ffprobe"
-                }
-            }
-        };
+        let binary_name = Self::binary_name(tool_id);
 
-        if let Ok(path) = which::which(binary_name) {
+        if let Ok(path) = which::which(&binary_name) {
             let path_str = path.to_string_lossy().to_string();
             if let Ok(_ver) = check_tool_version(&path_str) {
                 return Some((path_str, "system".to_string()));
@@ -135,18 +186,19 @@ impl ToolManager {
         None
     }
 
-    pub fn get_status(&self, app: &AppHandle, tool: Tool) -> ToolStatus {
-        if let Some((path, source)) = self.resolve_tool_path(app, tool) {
+    pub fn get_status(&self, app: &AppHandle, tool_id: impl AsRef<str>) -> ToolStatus {
+        let tool_id_str = tool_id.as_ref().to_string();
+        if let Some((path, source)) = self.resolve_tool_path(app, &tool_id_str) {
             let version = check_tool_version(&path).ok();
             ToolStatus {
-                tool,
+                tool_id: tool_id_str,
                 source,
                 path: Some(path),
                 version,
             }
         } else {
             ToolStatus {
-                tool,
+                tool_id: tool_id_str,
                 source: "missing".to_string(),
                 path: None,
                 version: None,
@@ -184,17 +236,10 @@ pub fn check_tool_version(binary_path: &str) -> Result<String> {
     Ok(first_line)
 }
 
-fn get_managed_tool_path(app: &AppHandle, tool: Tool) -> Option<String> {
+fn get_managed_tool_path(app: &AppHandle, tool_id: &str) -> Option<String> {
     let local_data = app.path().app_local_data_dir().ok()?;
-    let tool_name = match tool {
-        Tool::Ffmpeg => "ffmpeg",
-        Tool::Ffprobe => "ffprobe",
-    };
-    let exe_name = if cfg!(target_os = "windows") {
-        format!("{}.exe", tool_name)
-    } else {
-        tool_name.to_string()
-    };
+    let tool_name = ToolManager::managed_tool_name(tool_id);
+    let exe_name = ToolManager::binary_name(tool_id);
 
     let tools_dir = local_data.join("tools").join(tool_name);
     if !tools_dir.exists() {
@@ -224,8 +269,8 @@ pub async fn tool_status(
     app: AppHandle,
     state: tauri::State<'_, ToolManager>,
 ) -> std::result::Result<Vec<ToolStatus>, AppError> {
-    let s1 = state.get_status(&app, Tool::Ffmpeg);
-    let s2 = state.get_status(&app, Tool::Ffprobe);
+    let s1 = state.get_status(&app, "ffmpeg");
+    let s2 = state.get_status(&app, "ffprobe");
     Ok(vec![s1, s2])
 }
 
@@ -233,13 +278,13 @@ pub async fn tool_status(
 pub async fn tool_set_custom_path(
     _app: AppHandle,
     state: tauri::State<'_, ToolManager>,
-    tool: Tool,
+    tool_id: String,
     path: String,
 ) -> std::result::Result<ToolStatus, AppError> {
     let version = check_tool_version(&path)?;
-    state.set_custom_path(tool, path.clone());
+    state.set_custom_path(&tool_id, path.clone());
     Ok(ToolStatus {
-        tool,
+        tool_id: tool_id.clone(),
         source: "custom".to_string(),
         path: Some(path),
         version: Some(version),
@@ -251,7 +296,7 @@ pub async fn tool_capabilities(
     app: AppHandle,
     state: tauri::State<'_, ToolManager>,
 ) -> std::result::Result<Capabilities, AppError> {
-    let status = state.get_status(&app, Tool::Ffmpeg);
+    let status = state.get_status(&app, "ffmpeg");
     let path = match status.path {
         Some(p) => p,
         None => return Ok(Capabilities::default()),
@@ -324,16 +369,13 @@ pub async fn tool_capabilities(
 pub async fn tool_install(
     app: AppHandle,
     state: tauri::State<'_, ToolManager>,
-    tool: Tool,
+    tool_id: String,
     on_event: Channel<InstallEvent>,
 ) -> std::result::Result<ToolStatus, AppError> {
     let platform_key = get_platform_key();
     let manifest = load_manifest().await?;
 
-    let tool_key = match tool {
-        Tool::Ffmpeg => "ffmpeg",
-        Tool::Ffprobe => "ffprobe",
-    };
+    let tool_key = tool_id.as_str();
 
     let tool_manifest = manifest
         .tools
@@ -461,7 +503,7 @@ pub async fn tool_install(
         }
     }
 
-    let status = state.get_status(&app, tool);
+    let status = state.get_status(&app, &tool_id);
     let _ = on_event.send(InstallEvent::Done {
         status: status.clone(),
     });

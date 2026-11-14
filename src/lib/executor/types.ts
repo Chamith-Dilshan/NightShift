@@ -1,5 +1,8 @@
 export type Tool = "ffmpeg" | "ffprobe";
 
+/** Generic tool identifier — can be a known tool or any spec-defined tool ID. */
+export type ToolId = string;
+
 export interface JobSpec {
   tool: Tool;
   args: string[];
@@ -30,7 +33,8 @@ export type JobEvent =
     };
 
 export interface ToolStatus {
-  tool: Tool;
+  /** Tool identifier — "ffmpeg", "ffprobe", or any spec-defined ID. */
+  tool: ToolId;
   source: "managed" | "system" | "custom" | "missing";
   path?: string | null;
   version?: string | null;
@@ -99,7 +103,7 @@ export interface Executor {
   tools: {
     status(): Promise<ToolStatus[]>;
     capabilities(): Promise<Capabilities>;
-    install(tool: Tool, onEvent: (e: InstallEvent) => void): Promise<ToolStatus>;
-    setCustomPath(tool: Tool, path: string): Promise<ToolStatus>;
+    install(toolId: ToolId, onEvent: (e: InstallEvent) => void): Promise<ToolStatus>;
+    setCustomPath(toolId: ToolId, path: string): Promise<ToolStatus>;
   };
 }

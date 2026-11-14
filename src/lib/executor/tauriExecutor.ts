@@ -3,7 +3,7 @@ import {
   Executor,
   JobSpec,
   JobEvent,
-  Tool,
+  ToolId,
   ToolStatus,
   Capabilities,
   InstallEvent,
@@ -67,18 +67,18 @@ export class TauriExecutor implements Executor {
       return await invoke<Capabilities>("tool_capabilities");
     },
 
-    async install(tool: Tool, onEvent: (e: InstallEvent) => void): Promise<ToolStatus> {
+    async install(toolId: ToolId, onEvent: (e: InstallEvent) => void): Promise<ToolStatus> {
       const channel = new Channel<InstallEvent>();
       channel.onmessage = onEvent;
       return await invoke<ToolStatus>("tool_install", {
-        tool,
+        toolId,
         onEvent: channel,
       });
     },
 
-    async setCustomPath(tool: Tool, path: string): Promise<ToolStatus> {
+    async setCustomPath(toolId: ToolId, path: string): Promise<ToolStatus> {
       return await invoke<ToolStatus>("tool_set_custom_path", {
-        tool,
+        toolId,
         path,
       });
     },
