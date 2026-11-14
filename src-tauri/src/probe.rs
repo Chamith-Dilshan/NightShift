@@ -1,5 +1,5 @@
 use crate::error::AppError;
-use crate::tools::{Tool, ToolManager};
+use crate::tools::ToolManager;
 use std::time::Duration;
 use tauri::AppHandle;
 use tokio::process::Command;
@@ -14,7 +14,7 @@ pub async fn probe_media(
     path: String,
 ) -> std::result::Result<serde_json::Value, AppError> {
     let ffprobe_path = state
-        .resolve_tool_path(&app, Tool::Ffprobe)
+        .resolve_tool_path(&app, "ffprobe")
         .map(|(p, _)| p)
         .unwrap_or_else(|| {
             if cfg!(target_os = "windows") {

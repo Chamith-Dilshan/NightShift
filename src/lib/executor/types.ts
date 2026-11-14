@@ -1,10 +1,11 @@
-export type Tool = "ffmpeg" | "ffprobe";
-
 /** Generic tool identifier — can be a known tool or any spec-defined tool ID. */
 export type ToolId = string;
 
+/** @deprecated Use ToolId instead. Kept for backward compatibility. */
+export type Tool = ToolId;
+
 export interface JobSpec {
-  tool: Tool;
+  tool: ToolId;
   args: string[];
   outputPath?: string | null;
   outputExisted?: boolean;
