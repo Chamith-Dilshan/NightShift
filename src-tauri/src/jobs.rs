@@ -1,7 +1,7 @@
 use crate::error::AppError;
 use crate::line_splitter::LineSplitter;
 use crate::progress::ProgressParser;
-use crate::tools::{Tool, ToolManager};
+use crate::tools::ToolManager;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::process::Stdio;
@@ -19,7 +19,7 @@ const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 #[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct JobSpec {
-    pub tool: Tool,
+    pub tool: String,
     pub args: Vec<String>,
     pub output_path: Option<String>,
     pub output_existed: bool,
@@ -133,12 +133,12 @@ pub async fn run_job(
 
     // 2. Resolve tool path
     let (tool_path, _) = tools_state
-        .resolve_tool_path(&app, spec.tool)
-        .ok_or_else(|| AppError::Tool(format!("Tool {:?} is not installed or resolved", spec.tool)))?;
+        .resolve_tool_path(&app, &spec.tool)
+        .ok_or_else(|| AppError::Tool(format!("Tool '{}' is not installed or resolved", spec.tool)))?;
 
     // 3. Prepare args & inject progress pipe
     let mut final_args = Vec::new();
-    if spec.tool == Tool::Ffmpeg {
+    if spec.tool == "ffmpeg" {
         if !spec.args.iter().any(|a| a == "-progress") {
             final_args.push("-progress".to_string());
             final_args.push("pipe:1".to_string());

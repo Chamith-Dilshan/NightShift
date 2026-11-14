@@ -169,7 +169,7 @@ Current builds are not code-signed:
 
 **Prerequisites**
 
-- Node.js `v22+` and pnpm `v10+`
+- Node.js `v24+` and pnpm `v12+`
 - Rust (`stable`; run `rustup update stable`)
 - Platform build tools (Visual Studio 2022 C++ tools on Windows, Xcode Command Line Tools on macOS, WebKitGTK dependencies on Linux; see the [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/))
 
