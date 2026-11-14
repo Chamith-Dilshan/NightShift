@@ -233,9 +233,7 @@ export const ParamDefSchema = z.object({
 
 export type ParamDef = z.infer<typeof ParamDefSchema>;
 
-// ─── ArgNode type alias ───
-
-export type ArgNode = z.infer<typeof ArgNodeSchema>;
+// ArgNode type is already defined above (line 46) — using the manual type, not z.infer.
 
 // ─── RuleDef ───
 

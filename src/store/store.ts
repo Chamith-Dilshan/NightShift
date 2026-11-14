@@ -3,6 +3,7 @@ import videoReducer from "./videoTool/videoSlice";
 import templatesReducer from "./templates/templatesSlice";
 import jobsReducer from "./jobs/jobsSlice";
 import toolsReducer from "./tools/toolsSlice";
+import workbenchReducer from "./workbench/workbenchSlice";
 import { persistenceListener } from "./persistence/listener";
 
 export const store = configureStore({
@@ -11,6 +12,7 @@ export const store = configureStore({
     templates: templatesReducer,
     jobs: jobsReducer,
     tools: toolsReducer,
+    workbench: workbenchReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().prepend(persistenceListener.middleware),

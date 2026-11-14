@@ -84,7 +84,7 @@ describe("evalExpr", () => {
 
   describe("depth limit", () => {
     it("throws on deeply nested expressions", () => {
-      let expr: unknown = { literal: true };
+      let expr: any = { literal: true };
       for (let i = 0; i < 20; i++) {
         expr = { and: [expr] };
       }

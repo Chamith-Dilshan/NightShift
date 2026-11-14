@@ -1,4 +1,5 @@
 import { Expr, ExprValue } from "./schema";
+import { compareVersions } from "./versions";
 
 // ─── Context ───
 
@@ -44,7 +45,8 @@ function evalExprInner(expr: Expr, ctx: EvalContext, depth: number): boolean {
   if ("lte" in expr) return toNumber(evalValue((expr as { lte: [ExprValue, ExprValue] }).lte[0], ctx)) <= toNumber(evalValue((expr as { lte: [ExprValue, ExprValue] }).lte[1], ctx));
   if ("in" in expr && Array.isArray((expr as { in: [ExprValue, (string | number | boolean)[]] }).in[1])) {
     const val = evalValue((expr as { in: [ExprValue, (string | number | boolean)[]] }).in[0], ctx);
-    return (expr as { in: [ExprValue, (string | number | boolean)[]] }).in[1].includes(val);
+    const arr = (expr as { in: [ExprValue, (string | number | boolean)[]] }).in[1] as unknown[];
+    return arr.includes(val);
   }
   if ("set" in expr) return isSet(evalValue((expr as { set: ExprValue }).set, ctx));
   if ("unset" in expr) return !isSet(evalValue((expr as { unset: ExprValue }).unset, ctx));
@@ -99,33 +101,5 @@ function countNodes(expr: Expr): number {
   return count;
 }
 
-// ─── Version comparison (lenient) ───
-
-/**
- * Compare two version strings leniently.
- * Parses the leading numeric dotted prefix; unparseable versions return NaN.
- */
-export function compareVersions(a: string, b: string): number {
-  const partsA = parseVersion(a);
-  const partsB = parseVersion(b);
-
-  // If either version is unparseable, treat as equal (caller may warn)
-  if (partsA.length === 0 || partsB.length === 0) {
-    return 0;
-  }
-
-  const len = Math.max(partsA.length, partsB.length);
-  for (let i = 0; i < len; i++) {
-    const pa = i < partsA.length ? partsA[i] : 0;
-    const pb = i < partsB.length ? partsB[i] : 0;
-    if (pa > pb) return 1;
-    if (pa < pb) return -1;
-  }
-  return 0;
-}
-
-function parseVersion(v: string): number[] {
-  const match = v.match(/^(\d+(?:\.\d+)*)/);
-  if (!match) return [];
-  return match[1].split(".").map(Number);
-}
+// Version comparison is in versions.ts — re-export for convenience
+export { compareVersions } from "./versions";

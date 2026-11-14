@@ -30,7 +30,7 @@ export default function SettingsPage() {
     dispatch(fetchToolStatus());
   }, [dispatch]);
 
-  const handlePickCustomPath = async (tool: "ffmpeg" | "ffprobe") => {
+  const handlePickCustomPath = async (toolId: string) => {
     if (isTauri()) {
       try {
         const { open } = await import("@tauri-apps/plugin-dialog");
@@ -38,7 +38,7 @@ export default function SettingsPage() {
           multiple: false,
           filters: [
             {
-              name: `${tool.toUpperCase()} Executable`,
+              name: `${toolId.toUpperCase()} Executable`,
               extensions: ["exe", "*"],
             },
           ],
@@ -46,7 +46,7 @@ export default function SettingsPage() {
 
         if (selected && typeof selected === "string") {
           const executor = getExecutor();
-          await executor.tools.setCustomPath(tool, selected);
+          await executor.tools.setCustomPath(toolId, selected);
           dispatch(fetchToolStatus());
         }
         return;
