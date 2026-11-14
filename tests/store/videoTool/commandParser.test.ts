@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatCommand, parseCommand } from "./commandParser";
+import { formatCommand, parseCommand } from "@/store/videoTool/commandParser";
 
 describe("commandParser", () => {
   it("should parse standard space-separated command", () => {

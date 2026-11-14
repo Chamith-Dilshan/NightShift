@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { LogStore } from "./logStore";
+import { LogStore } from "@/store/jobs/logStore";
 
 describe("LogStore", () => {
   it("returns stable empty array when jobId is unknown", () => {

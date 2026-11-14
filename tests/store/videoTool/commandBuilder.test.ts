@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { generateVideoCommand } from "./commandBuilder";
-import { DEFAULT_VIDEO_SETTINGS, VideoSettings } from "./types";
+import { generateVideoCommand } from "@/store/videoTool/commandBuilder";
+import { DEFAULT_VIDEO_SETTINGS, VideoSettings } from "@/store/videoTool/types";
 
 describe("commandBuilder golden tests", () => {
   it("Example 1: MP4 / H.264 defaults", () => {

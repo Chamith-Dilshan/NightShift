@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { validateVideo, parseTimeSeconds } from "./videoSchema";
-import { DEFAULT_VIDEO_SETTINGS, VideoSliceState } from "./types";
+import { validateVideo, parseTimeSeconds } from "@/store/videoTool/videoSchema";
+import { DEFAULT_VIDEO_SETTINGS, VideoSliceState } from "@/store/videoTool/types";
 
 describe("videoSchema and validateVideo", () => {
   const baseState: VideoSliceState = {

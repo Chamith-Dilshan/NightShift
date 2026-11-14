@@ -97,7 +97,7 @@ export function CommandPreview({ spec, toolId }: CommandPreviewProps) {
 
       <div
         className={`rounded-lg p-3 font-mono text-xs overflow-x-auto whitespace-pre-wrap break-all ${
-          hasErrors ? "bg-red-500/10 text-red-400" : "bg-muted/50 text-muted-foreground"
+          hasErrors ? "bg-destructive/10 text-destructive" : "bg-muted/50 text-muted-foreground"
         }`}
       >
         {displayText || "(empty command)"}
@@ -110,10 +110,10 @@ export function CommandPreview({ spec, toolId }: CommandPreviewProps) {
               key={i}
               className={`text-xs ${
                 issue.severity === "error"
-                  ? "text-red-400"
+                  ? "text-destructive"
                   : issue.severity === "warning"
-                  ? "text-yellow-400"
-                  : "text-blue-400"
+                  ? "text-accent-foreground"
+                  : "text-primary"
               }`}
             >
               {issue.message}

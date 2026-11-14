@@ -7,7 +7,7 @@ import {
   TEMPLATE_MAX_PACK_SIZE,
   TEMPLATE_MAX_ARGV_TOKENS,
   TEMPLATE_MAX_STRING_LENGTH,
-} from "./schema";
+} from "@/core/template/schema";
 import {
   parseTemplateFile,
   canonicalizeTemplate,
@@ -15,9 +15,9 @@ import {
   exportPack,
   stripForExport,
   validateRawConstraints,
-} from "./io";
-import { reviewTemplate, ReviewWarning } from "./review";
-import { resolveToken, resolveRawArgv, validateVariableReferences } from "./variables";
+} from "@/core/template/io";
+import { reviewTemplate, ReviewWarning } from "@/core/template/review";
+import { resolveToken, resolveRawArgv, validateVariableReferences } from "@/core/template/variables";
 
 const makeTemplate = (overrides = {}): NightShiftTemplate => ({
   schemaVersion: 1,
@@ -401,7 +401,7 @@ describe("variable validation", () => {
         argv: ["-i", "{input}", "-q", "{var:quality}", "{output}"],
         variables: [],
       },
-      inputs: { in: { from: "$input" } },
+      inputs: { in: { from: "$input" as const } },
       output: {},
     };
     const errors = validateVariableReferences(node);
@@ -419,7 +419,7 @@ describe("variable validation", () => {
         argv: ["-i", "{input}", "-q", "{var:quality}", "{output}"],
         variables: [{ id: "quality", label: "Quality", type: "int" as const }],
       },
-      inputs: { in: { from: "$input" } },
+      inputs: { in: { from: "$input" as const } },
       output: {},
     };
     const errors = validateVariableReferences(node);

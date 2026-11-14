@@ -80,11 +80,11 @@ function ImportReview({ templates, onConfirm, onCancel }: ImportReviewProps) {
   const severityIcon = (severity: string) => {
     switch (severity) {
       case "error":
-        return <XCircle className="w-4 h-4 text-red-400" />;
+        return <XCircle className="w-4 h-4 text-destructive" />;
       case "warning":
-        return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
+        return <AlertTriangle className="w-4 h-4 text-accent-foreground" />;
       case "info":
-        return <Info className="w-4 h-4 text-blue-400" />;
+        return <Info className="w-4 h-4 text-primary" />;
       default:
         return null;
     }
@@ -113,7 +113,7 @@ function ImportReview({ templates, onConfirm, onCancel }: ImportReviewProps) {
                   selectedIndices.has(index)
                     ? "border-primary"
                     : "border-border hover:border-muted-foreground/50"
-                } ${errors.length > 0 ? "bg-red-500/5" : ""}`}
+                } ${errors.length > 0 ? "bg-destructive/5" : ""}`}
                 onClick={() => toggleSelect(index)}
               >
                 <div className="flex items-start justify-between">

@@ -26,12 +26,9 @@ import { StoredTemplate } from "@/store/templates/types";
 import { VideoSettings } from "@/store/videoTool/types";
 import {
   parseTemplateFile,
-  migrateVideoTemplate,
   exportPack,
-  validateTemplate,
   NightShiftTemplate,
 } from "@/core/template";
-import { migrateRawTemplate } from "@/store/templates/migrations";
 
 /**
  * Extract VideoSettings from a StoredTemplate's params.
@@ -141,30 +138,6 @@ export default function TemplateManager() {
             isBuiltIn: false,
           }));
           dispatch(importTemplates(stored));
-        } else {
-          // Fall back to v0.1 migration
-          const jsonRaw = JSON.parse(raw);
-          const items = Array.isArray(jsonRaw) ? jsonRaw : [jsonRaw];
-          const validStored: StoredTemplate[] = [];
-
-          for (const item of items) {
-            // Try NightShiftTemplate first
-            const nsResult = validateTemplate(item);
-            if (nsResult.ok) {
-              validStored.push({ ...nsResult.template, isBuiltIn: false });
-              continue;
-            }
-            // Fall back to v0.1 migration
-            const migrated = migrateRawTemplate(item);
-            if (migrated) {
-              const ns = migrateVideoTemplate(migrated);
-              validStored.push({ ...ns, isBuiltIn: false });
-            }
-          }
-
-          if (validStored.length > 0) {
-            dispatch(importTemplates(validStored));
-          }
         }
       } catch (err) {
         console.warn("Import error:", err);

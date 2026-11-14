@@ -63,13 +63,13 @@ function getStatusBadge(source: ToolSource) {
     case "system":
       return {
         label: "System",
-        className: "bg-blue-500/10 border-blue-500/50 text-blue-400",
+        className: "bg-primary/10 border-primary/50 text-primary",
         icon: CheckCircle,
       };
     case "custom":
       return {
         label: "Custom",
-        className: "bg-yellow-500/10 border-yellow-500/50 text-yellow-400",
+        className: "bg-accent/10 border-accent/50 text-accent-foreground",
         icon: FolderOpen,
       };
     case "missing":

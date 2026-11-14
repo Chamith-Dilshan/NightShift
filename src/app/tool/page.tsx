@@ -204,7 +204,7 @@ function ToolWorkbenchContent() {
           )}
 
           {error && (
-            <Card className="p-6 text-center text-red-400 text-sm">
+            <Card className="p-6 text-center text-destructive text-sm">
               {error}
             </Card>
           )}
@@ -266,8 +266,8 @@ function ToolWorkbenchContent() {
           </Button>
 
           {!isInstalled && (
-            <Card className="p-4 bg-yellow-500/10 border-yellow-500/20">
-              <p className="text-xs text-yellow-400">
+            <Card className="p-4 bg-accent/10 border-accent/20">
+              <p className="text-xs text-accent-foreground">
                 {toolId} is not installed. Please install it from the Settings page or provide a custom path.
               </p>
             </Card>

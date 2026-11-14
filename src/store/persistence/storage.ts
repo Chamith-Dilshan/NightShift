@@ -1,12 +1,7 @@
 import { isTauri } from "@/lib/isTauri";
-import { StoredTemplate, VideoTemplate } from "../templates/types";
+import { StoredTemplate } from "../templates/types";
 import { VideoSettings } from "../videoTool/types";
-import { migrateRawTemplate } from "../templates/migrations";
-import {
-  NightShiftTemplate,
-  migrateVideoTemplate,
-  validateTemplate,
-} from "@/core/template";
+import { validateTemplate } from "@/core/template";
 
 const TEMPLATES_FILE = "templates.json";
 const SETTINGS_FILE = "settings.json";
@@ -35,14 +30,14 @@ export async function saveTemplatesToDisk(
 
   if (typeof window !== "undefined") {
     localStorage.setItem(
-      "nightshift_v2_templates",
+      "nightshift_templates",
       JSON.stringify(customTemplates)
     );
   }
 }
 
 /**
- * Load templates from disk, migrating v0.1 format if needed.
+ * Load templates from disk.
  */
 export async function loadTemplatesFromDisk(): Promise<Record<string, StoredTemplate>> {
   let raw: Record<string, unknown> | null = null;
@@ -61,32 +56,11 @@ export async function loadTemplatesFromDisk(): Promise<Record<string, StoredTemp
   }
 
   if (!raw && typeof window !== "undefined") {
-    // Try v2 (NightShiftTemplate) first
-    const localV2 = localStorage.getItem("nightshift_v2_templates");
-    if (localV2) {
+    const local = localStorage.getItem("nightshift_templates");
+    if (local) {
       try {
-        raw = JSON.parse(localV2);
+        raw = JSON.parse(local);
       } catch {}
-    }
-
-    // Fall back to v1 (VideoTemplate)
-    if (!raw) {
-      const localV1 = localStorage.getItem("nightshift_v1_templates");
-      if (localV1) {
-        try {
-          raw = JSON.parse(localV1);
-        } catch {}
-      }
-    }
-
-    // Check legacy v0 templates in localStorage
-    if (!raw) {
-      const legacy = localStorage.getItem("nightshift_templates");
-      if (legacy) {
-        try {
-          raw = JSON.parse(legacy);
-        } catch {}
-      }
     }
   }
 
@@ -97,7 +71,7 @@ export async function loadTemplatesFromDisk(): Promise<Record<string, StoredTemp
 
       const obj = item as Record<string, unknown>;
 
-      // Already NightShiftTemplate format
+      // NightShiftTemplate format
       if (obj.kind === "nightshift.template") {
         const validated = validateTemplate(item);
         if (validated.ok) {
@@ -107,35 +81,6 @@ export async function loadTemplatesFromDisk(): Promise<Record<string, StoredTemp
           };
           result[stored.id] = stored;
         }
-        continue;
-      }
-
-      // v0.1 VideoTemplate format — migrate
-      if (obj.schemaVersion === 1 && obj.settings && typeof obj.settings === "object") {
-        const v1Template: VideoTemplate = {
-          id: String(obj.id),
-          name: String(obj.name),
-          createdAt: Number(obj.createdAt),
-          schemaVersion: 1,
-          isBuiltIn: Boolean(obj.isBuiltIn),
-          settings: obj.settings as VideoSettings,
-        };
-        const migrated = migrateVideoTemplate(v1Template);
-        result[migrated.id] = {
-          ...migrated,
-          isBuiltIn: Boolean(obj.isBuiltIn),
-        };
-        continue;
-      }
-
-      // Legacy v0 format — use old migration
-      const legacyMigrated = migrateRawTemplate(item);
-      if (legacyMigrated) {
-        const nsTemplate = migrateVideoTemplate(legacyMigrated);
-        result[nsTemplate.id] = {
-          ...nsTemplate,
-          isBuiltIn: Boolean(legacyMigrated.isBuiltIn),
-        };
       }
     }
   }
@@ -160,7 +105,7 @@ export async function saveLastSettingsToDisk(
 
   if (typeof window !== "undefined") {
     localStorage.setItem(
-      "nightshift_v1_settings",
+      "nightshift_settings",
       JSON.stringify(settings)
     );
   }
@@ -180,7 +125,7 @@ export async function loadLastSettingsFromDisk(): Promise<VideoSettings | null> 
   }
 
   if (!raw && typeof window !== "undefined") {
-    const local = localStorage.getItem("nightshift_v1_settings");
+    const local = localStorage.getItem("nightshift_settings");
     if (local) {
       try {
         raw = JSON.parse(local);
@@ -189,12 +134,7 @@ export async function loadLastSettingsFromDisk(): Promise<VideoSettings | null> 
   }
 
   if (raw && typeof raw === "object") {
-    const dummyTemplate = migrateRawTemplate({
-      name: "temp",
-      schemaVersion: 1,
-      settings: raw,
-    });
-    return dummyTemplate?.settings || null;
+    return raw as VideoSettings;
   }
 
   return null;
