@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   ArrowRight,
   Sparkles,
+  BookOpen,
 } from "lucide-react";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -61,6 +62,16 @@ export default function HomePage() {
             >
               <ShieldCheck className="w-3.5 h-3.5 mr-1.5 text-primary" />
               {isInstalled ? "Environment Ready" : "Setup Required"}
+            </Button>
+          </Link>
+
+          <Link href="/templates">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 text-xs font-mono text-muted-foreground hover:text-foreground"
+            >
+              <BookOpen className="w-3.5 h-3.5 mr-1.5" /> Templates
             </Button>
           </Link>
 

@@ -22,8 +22,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { StoredTemplate } from "@/store/templates/types";
+import { VideoSettings } from "@/store/videoTool/types";
+import {
+  parseTemplateFile,
+  migrateVideoTemplate,
+  exportPack,
+  validateTemplate,
+  NightShiftTemplate,
+} from "@/core/template";
 import { migrateRawTemplate } from "@/store/templates/migrations";
-import { VideoTemplate } from "@/store/templates/types";
+
+/**
+ * Extract VideoSettings from a StoredTemplate's params.
+ * For FFmpeg builtin templates, params is the VideoSettings object.
+ */
+function extractSettings(tpl: StoredTemplate): VideoSettings | null {
+  const node = tpl.graph?.nodes?.[0];
+  if (!node || node.mode !== "params" || !node.params) return null;
+  return node.params as unknown as VideoSettings;
+}
 
 export default function TemplateManager() {
   const dispatch = useAppDispatch();
@@ -45,18 +63,46 @@ export default function TemplateManager() {
     const tpl = templates[id];
     if (tpl) {
       dispatch(setActiveTemplateId(id));
-      dispatch(setSettings(tpl.settings));
+      const extracted = extractSettings(tpl);
+      if (extracted) {
+        dispatch(setSettings(extracted));
+      }
     }
   };
 
   const handleSave = () => {
     if (!newTemplateName.trim()) return;
-    dispatch(
-      saveTemplate({
-        name: newTemplateName.trim(),
-        settings,
-      })
-    );
+
+    const now = new Date().toISOString();
+    const id = `tpl_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+    const template: NightShiftTemplate = {
+      schemaVersion: 1,
+      kind: "nightshift.template",
+      id,
+      name: newTemplateName.trim(),
+      createdAt: now,
+      updatedAt: now,
+      requires: [{ tool: "ffmpeg" }],
+      graph: {
+        nodes: [
+          {
+            id: "n1",
+            tool: "ffmpeg",
+            command: "transcode",
+            mode: "params",
+            params: settings as unknown as Record<string, unknown>,
+            inputs: { in: { from: "$input" } },
+            output: {
+              namePattern: settings.output.nameTemplate ?? "{name}_nightshift",
+            },
+          },
+        ],
+        edges: [],
+      },
+    };
+
+    dispatch(saveTemplate(template));
     setNewTemplateName("");
     setIsSaving(false);
   };
@@ -69,12 +115,12 @@ export default function TemplateManager() {
 
   const handleExport = () => {
     const customOnly = templateList.filter((t) => !t.isBuiltIn);
-    const jsonStr = JSON.stringify(customOnly, null, 2);
+    const jsonStr = exportPack(customOnly as NightShiftTemplate[]);
     const blob = new Blob([jsonStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `nightshift_templates_${Date.now()}.json`;
+    a.download = `nightshift_templates_${Date.now()}.nightshift-pack.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -86,17 +132,39 @@ export default function TemplateManager() {
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const raw = JSON.parse(event.target?.result as string);
-        const items = Array.isArray(raw) ? raw : [raw];
-        const validTemplates: VideoTemplate[] = [];
+        const raw = event.target?.result as string;
+        const parsed = parseTemplateFile(raw, file.size);
 
-        for (const item of items) {
-          const migrated = migrateRawTemplate(item);
-          if (migrated) validTemplates.push(migrated);
-        }
+        if (parsed.ok) {
+          const stored = parsed.templates.map((t) => ({
+            ...t,
+            isBuiltIn: false,
+          }));
+          dispatch(importTemplates(stored));
+        } else {
+          // Fall back to v0.1 migration
+          const jsonRaw = JSON.parse(raw);
+          const items = Array.isArray(jsonRaw) ? jsonRaw : [jsonRaw];
+          const validStored: StoredTemplate[] = [];
 
-        if (validTemplates.length > 0) {
-          dispatch(importTemplates(validTemplates));
+          for (const item of items) {
+            // Try NightShiftTemplate first
+            const nsResult = validateTemplate(item);
+            if (nsResult.ok) {
+              validStored.push({ ...nsResult.template, isBuiltIn: false });
+              continue;
+            }
+            // Fall back to v0.1 migration
+            const migrated = migrateRawTemplate(item);
+            if (migrated) {
+              const ns = migrateVideoTemplate(migrated);
+              validStored.push({ ...ns, isBuiltIn: false });
+            }
+          }
+
+          if (validStored.length > 0) {
+            dispatch(importTemplates(validStored));
+          }
         }
       } catch (err) {
         console.warn("Import error:", err);

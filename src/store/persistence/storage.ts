@@ -1,15 +1,20 @@
 import { isTauri } from "@/lib/isTauri";
-import { VideoTemplate } from "../templates/types";
+import { StoredTemplate, VideoTemplate } from "../templates/types";
 import { VideoSettings } from "../videoTool/types";
 import { migrateRawTemplate } from "../templates/migrations";
+import {
+  NightShiftTemplate,
+  migrateVideoTemplate,
+  validateTemplate,
+} from "@/core/template";
 
 const TEMPLATES_FILE = "templates.json";
 const SETTINGS_FILE = "settings.json";
 
 export async function saveTemplatesToDisk(
-  templates: Record<string, VideoTemplate>
+  templates: Record<string, StoredTemplate>
 ): Promise<void> {
-  const customTemplates: Record<string, VideoTemplate> = {};
+  const customTemplates: Record<string, StoredTemplate> = {};
   for (const [id, t] of Object.entries(templates)) {
     if (!t.isBuiltIn) {
       customTemplates[id] = t;
@@ -30,13 +35,16 @@ export async function saveTemplatesToDisk(
 
   if (typeof window !== "undefined") {
     localStorage.setItem(
-      "nightshift_v1_templates",
+      "nightshift_v2_templates",
       JSON.stringify(customTemplates)
     );
   }
 }
 
-export async function loadTemplatesFromDisk(): Promise<Record<string, VideoTemplate>> {
+/**
+ * Load templates from disk, migrating v0.1 format if needed.
+ */
+export async function loadTemplatesFromDisk(): Promise<Record<string, StoredTemplate>> {
   let raw: Record<string, unknown> | null = null;
 
   if (isTauri()) {
@@ -53,11 +61,22 @@ export async function loadTemplatesFromDisk(): Promise<Record<string, VideoTempl
   }
 
   if (!raw && typeof window !== "undefined") {
-    const localV1 = localStorage.getItem("nightshift_v1_templates");
-    if (localV1) {
+    // Try v2 (NightShiftTemplate) first
+    const localV2 = localStorage.getItem("nightshift_v2_templates");
+    if (localV2) {
       try {
-        raw = JSON.parse(localV1);
+        raw = JSON.parse(localV2);
       } catch {}
+    }
+
+    // Fall back to v1 (VideoTemplate)
+    if (!raw) {
+      const localV1 = localStorage.getItem("nightshift_v1_templates");
+      if (localV1) {
+        try {
+          raw = JSON.parse(localV1);
+        } catch {}
+      }
     }
 
     // Check legacy v0 templates in localStorage
@@ -71,12 +90,52 @@ export async function loadTemplatesFromDisk(): Promise<Record<string, VideoTempl
     }
   }
 
-  const result: Record<string, VideoTemplate> = {};
+  const result: Record<string, StoredTemplate> = {};
   if (raw && typeof raw === "object") {
     for (const item of Object.values(raw)) {
-      const migrated = migrateRawTemplate(item);
-      if (migrated) {
-        result[migrated.id] = migrated;
+      if (!item || typeof item !== "object") continue;
+
+      const obj = item as Record<string, unknown>;
+
+      // Already NightShiftTemplate format
+      if (obj.kind === "nightshift.template") {
+        const validated = validateTemplate(item);
+        if (validated.ok) {
+          const stored: StoredTemplate = {
+            ...validated.template,
+            isBuiltIn: Boolean(obj.isBuiltIn),
+          };
+          result[stored.id] = stored;
+        }
+        continue;
+      }
+
+      // v0.1 VideoTemplate format — migrate
+      if (obj.schemaVersion === 1 && obj.settings && typeof obj.settings === "object") {
+        const v1Template: VideoTemplate = {
+          id: String(obj.id),
+          name: String(obj.name),
+          createdAt: Number(obj.createdAt),
+          schemaVersion: 1,
+          isBuiltIn: Boolean(obj.isBuiltIn),
+          settings: obj.settings as VideoSettings,
+        };
+        const migrated = migrateVideoTemplate(v1Template);
+        result[migrated.id] = {
+          ...migrated,
+          isBuiltIn: Boolean(obj.isBuiltIn),
+        };
+        continue;
+      }
+
+      // Legacy v0 format — use old migration
+      const legacyMigrated = migrateRawTemplate(item);
+      if (legacyMigrated) {
+        const nsTemplate = migrateVideoTemplate(legacyMigrated);
+        result[nsTemplate.id] = {
+          ...nsTemplate,
+          isBuiltIn: Boolean(legacyMigrated.isBuiltIn),
+        };
       }
     }
   }

@@ -4,6 +4,9 @@ import {
   saveTemplate,
   deleteTemplate,
   renameTemplate,
+  updateTemplateTags,
+  updateTemplateDescription,
+  duplicateTemplate,
   importTemplates,
 } from "../templates/templatesSlice";
 import {
@@ -29,6 +32,9 @@ persistenceListener.startListening({
     saveTemplate,
     deleteTemplate,
     renameTemplate,
+    updateTemplateTags,
+    updateTemplateDescription,
+    duplicateTemplate,
     importTemplates
   ),
   effect: async (_action, listenerApi) => {
