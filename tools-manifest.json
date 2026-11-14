@@ -59,13 +59,13 @@
       "homepage": "https://libvips.org",
       "artifacts": {
         "windows-x86_64": {
-          "url": "https://github.com/kleisauke/libvips-packaging/releases/download/v8.18.7/libvips-8.18.7-win-x64.tar.gz",
-          "sha256": "e125ead87ace527ce77e78faa1af3b7051dc0e91a9948693329941dbe3c9f373",
-          "archive": "tar.gz",
+          "url": "https://github.com/libvips/build-win64-mxe/releases/download/v8.18.7/vips-dev-x64-web-8.18.7.zip",
+          "sha256": "3a122eb3d588690008216f786338e2f9329dba3c3c2768b5933cf7299d549241",
+          "archive": "zip",
           "bins": {
-            "vips": "bin/vips.exe",
-            "vipsthumbnail": "bin/vipsthumbnail.exe",
-            "vipsheader": "bin/vipsheader.exe"
+            "vips": "vips-8.18/bin/vips.exe",
+            "vipsthumbnail": "vips-8.18/bin/vipsthumbnail.exe",
+            "vipsheader": "vips-8.18/bin/vipsheader.exe"
           }
         }
       }

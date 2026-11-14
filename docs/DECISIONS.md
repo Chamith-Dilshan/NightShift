@@ -67,11 +67,12 @@ The `v0.1.0` git tag does not exist locally (only `sidecar-prototype`). The curr
 ## 2026-11-14: M4 — libvips Manifest Decision (T-4.5)
 
 ### libvips Windows Download Source
-**Decision:** Use **kleisauke/libvips-packaging** as the managed download source for Windows.
-- URL: `https://github.com/kleisauke/libvips-packaging/releases/download/v8.18.7/libvips-8.18.7-win-x64.tar.gz`
-- SHA-256: `e125ead87ace527ce77e78faa1af3b7051dc0e91a9948693329941dbe3c9f373`
+**Decision:** Use **libvips/build-win64-mxe** (official) as the managed download source for Windows.
+- URL: `https://github.com/libvips/build-win64-mxe/releases/download/v8.18.7/vips-dev-x64-web-8.18.7.zip`
+- SHA-256: `3a122eb3d588690008216f786338e2f9329dba3c3c2768b5933cf7299d549241`
 - Licence: LGPL-3.0 (same as libvips core)
-- This is the same source used by pyvips[binary] on Windows
+- This is the official build system maintained by the libvips project
+- kleisauke/libvips-packaging is a repackaging layer for pyvips/NetVips — we use the official source directly
 - No macOS/Linux managed download — users install via Homebrew/apt with hints
 
 ### libvips Spec Authoring
