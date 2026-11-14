@@ -1,0 +1,780 @@
+{
+  "schemaVersion": 1,
+  "id": "ffmpeg",
+  "name": "FFmpeg",
+  "description": "Video, audio, and GIF conversion with filters, watermark overlay, and codec control.",
+  "category": "video",
+  "homepage": "https://ffmpeg.org",
+  "license": {
+    "name": "GPL-3.0",
+    "url": "https://www.gnu.org/licenses/gpl-3.0.html",
+    "note": "FFmpeg builds may include LGPL components; GPL builds include all filters."
+  },
+  "testedWith": ["7.1", "6.1"],
+  "binaries": [
+    {
+      "id": "ffmpeg",
+      "role": "primary",
+      "names": {
+        "windows": "ffmpeg.exe",
+        "unix": "ffmpeg"
+      }
+    },
+    {
+      "id": "ffprobe",
+      "role": "helper",
+      "names": {
+        "windows": "ffprobe.exe",
+        "unix": "ffprobe"
+      }
+    }
+  ],
+  "install": {
+    "manifestId": "ffmpeg",
+    "sources": ["managed", "system", "custom"],
+    "detect": {
+      "binary": "ffmpeg",
+      "versionArgs": ["-version"],
+      "versionRegex": "^ffmpeg version ([\\d.]+)",
+      "minVersion": "4.0"
+    },
+    "hints": {
+      "windows": "Download from https://github.com/BtbN/FFmpeg-Builds/releases",
+      "macos": "Install with Homebrew: brew install ffmpeg",
+      "linux": "Install with your package manager: sudo apt install ffmpeg"
+    }
+  },
+  "probes": {
+    "input": {
+      "binary": "ffprobe",
+      "args": ["-v", "quiet", "-print_format", "json", "-show_format", "-show_streams", "{in:input}"],
+      "parse": {
+        "kind": "json",
+        "path": "streams"
+      }
+    }
+  },
+  "builder": {
+    "kind": "builtin",
+    "id": "ffmpeg-video"
+  },
+  "ui": {
+    "panel": {
+      "kind": "builtin",
+      "id": "video-panel"
+    }
+  },
+  "commands": [
+    {
+      "id": "transcode",
+      "name": "Transcode",
+      "description": "Transcode video with optional filters, watermark, and audio processing.",
+      "binary": "ffmpeg",
+      "inputs": [
+        {
+          "id": "input",
+          "label": "Input video",
+          "kind": "file",
+          "accepts": {
+            "types": ["video", "audio"],
+            "extensions": [".mp4", ".webm", ".mkv", ".avi", ".mov", ".wmv", ".flv", ".m4v", ".mp3", ".wav", ".aac", ".ogg"]
+          },
+          "required": true
+        },
+        {
+          "id": "watermark",
+          "label": "Watermark image",
+          "kind": "file",
+          "accepts": {
+            "types": ["image"],
+            "extensions": [".png", ".jpg", ".jpeg", ".webp"]
+          },
+          "required": false
+        }
+      ],
+      "outputs": [
+        {
+          "id": "output",
+          "label": "Output file",
+          "kind": "file",
+          "required": true,
+          "ext": {
+            "map": {
+              "param": "outputFormat",
+              "table": {
+                "mp4": ".mp4",
+                "webm": ".webm",
+                "gif": ".gif",
+                "custom": ".{customExt}"
+              }
+            }
+          }
+        }
+      ],
+      "groups": [
+        { "id": "output", "label": "Output", "order": 1 },
+        { "id": "video", "label": "Video", "order": 2 },
+        { "id": "audio", "label": "Audio", "order": 3 },
+        { "id": "trim", "label": "Trim", "order": 4 },
+        { "id": "crop", "label": "Crop", "order": 5 },
+        { "id": "transforms", "label": "Transforms", "order": 6 },
+        { "id": "filters", "label": "Filters", "order": 7 },
+        { "id": "watermark", "label": "Watermark", "order": 8 },
+        { "id": "gif", "label": "GIF Options", "order": 9 }
+      ],
+      "params": [
+        {
+          "id": "outputFormat",
+          "label": "Output format",
+          "group": "output",
+          "type": "enum",
+          "default": "mp4",
+          "options": [
+            { "value": "mp4", "label": "MP4 (H.264/HEVC)" },
+            { "value": "webm", "label": "WebM (VP9/AV1)" },
+            { "value": "gif", "label": "GIF (Animated)" },
+            { "value": "custom", "label": "Custom extension" }
+          ]
+        },
+        {
+          "id": "customExt",
+          "label": "Custom extension",
+          "help": "File extension without the dot",
+          "group": "output",
+          "type": "string",
+          "default": "mp4",
+          "visibleWhen": { "eq": [{ "param": "outputFormat" }, { "literal": "custom" }] }
+        },
+        {
+          "id": "collisionMode",
+          "label": "Collision mode",
+          "group": "output",
+          "type": "enum",
+          "default": "suffix",
+          "options": [
+            { "value": "suffix", "label": "Add suffix (safe)" },
+            { "value": "overwrite", "label": "Overwrite existing" }
+          ]
+        },
+        {
+          "id": "videoEnabled",
+          "label": "Include video",
+          "group": "video",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "id": "videoCodec",
+          "label": "Video codec",
+          "group": "video",
+          "type": "enum",
+          "default": "libx264",
+          "options": [
+            { "value": "libx264", "label": "H.264 (x264)" },
+            { "value": "libx265", "label": "HEVC (x265)" },
+            { "value": "libvpx-vp9", "label": "VP9", "when": { "ne": [{ "param": "outputFormat" }, { "literal": "mp4" }] } },
+            { "value": "libaom-av1", "label": "AV1 (aom)" },
+            { "value": "copy", "label": "Copy (no re-encode)" }
+          ]
+        },
+        {
+          "id": "rateControl",
+          "label": "Rate control",
+          "group": "video",
+          "type": "enum",
+          "default": "crf",
+          "options": [
+            { "value": "crf", "label": "CRF (constant quality)" },
+            { "value": "bitrate", "label": "Target bitrate" }
+          ],
+          "visibleWhen": { "ne": [{ "param": "videoCodec" }, { "literal": "copy" }] }
+        },
+        {
+          "id": "crf",
+          "label": "CRF value",
+          "help": "Lower = higher quality (0-51, 23 is default)",
+          "group": "video",
+          "type": "int",
+          "default": 23,
+          "min": 0,
+          "max": 51,
+          "visibleWhen": { "and": [{ "eq": [{ "param": "rateControl" }, { "literal": "crf" }] }, { "ne": [{ "param": "videoCodec" }, { "literal": "copy" }] }] }
+        },
+        {
+          "id": "bitrate",
+          "label": "Video bitrate",
+          "help": "e.g., 4M, 2M, 8M",
+          "group": "video",
+          "type": "string",
+          "default": "4M",
+          "visibleWhen": { "and": [{ "eq": [{ "param": "rateControl" }, { "literal": "bitrate" }] }, { "ne": [{ "param": "videoCodec" }, { "literal": "copy" }] }] }
+        },
+        {
+          "id": "preset",
+          "label": "Encoding preset",
+          "help": "Faster = larger file, Slower = smaller file",
+          "group": "video",
+          "type": "enum",
+          "default": "medium",
+          "options": [
+            { "value": "ultrafast", "label": "Ultrafast" },
+            { "value": "superfast", "label": "Superfast" },
+            { "value": "veryfast", "label": "Veryfast" },
+            { "value": "faster", "label": "Faster" },
+            { "value": "fast", "label": "Fast" },
+            { "value": "medium", "label": "Medium (default)" },
+            { "value": "slow", "label": "Slow" },
+            { "value": "slower", "label": "Slower" },
+            { "value": "veryslow", "label": "Veryslow" }
+          ],
+          "visibleWhen": { "and": [
+            { "ne": [{ "param": "videoCodec" }, { "literal": "copy" }] },
+            { "or": [{ "eq": [{ "param": "videoCodec" }, { "literal": "libx264" }] }, { "eq": [{ "param": "videoCodec" }, { "literal": "libx265" }] }] }
+          ]}
+        },
+        {
+          "id": "cpuUsed",
+          "label": "CPU usage (VP9/AV1)",
+          "help": "0 = slowest/best quality, 9 = fastest",
+          "group": "video",
+          "type": "int",
+          "default": 1,
+          "min": 0,
+          "max": 9,
+          "visibleWhen": { "and": [
+            { "ne": [{ "param": "videoCodec" }, { "literal": "copy" }] },
+            { "or": [{ "eq": [{ "param": "videoCodec" }, { "literal": "libvpx-vp9" }] }, { "eq": [{ "param": "videoCodec" }, { "literal": "libaom-av1" }] }] }
+          ]}
+        },
+        {
+          "id": "resolutionHeight",
+          "label": "Output height",
+          "help": "Width is auto-calculated to preserve aspect ratio. Leave empty to keep original.",
+          "group": "video",
+          "type": "int",
+          "min": 1,
+          "max": 8192
+        },
+        {
+          "id": "fps",
+          "label": "Output FPS",
+          "help": "Leave empty to keep original frame rate.",
+          "group": "video",
+          "type": "float",
+          "min": 0.1,
+          "max": 120
+        },
+        {
+          "id": "webOptimized",
+          "label": "Web optimized (fast start)",
+          "group": "video",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "id": "keyframeEnabled",
+          "label": "Force keyframe interval",
+          "group": "video",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "id": "keyframeInterval",
+          "label": "Keyframe interval (frames)",
+          "group": "video",
+          "type": "int",
+          "default": 24,
+          "min": 1,
+          "visibleWhen": { "set": { "param": "keyframeEnabled" } }
+        },
+        {
+          "id": "audioEnabled",
+          "label": "Include audio",
+          "group": "audio",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "id": "audioCodec",
+          "label": "Audio codec",
+          "group": "audio",
+          "type": "enum",
+          "default": "aac",
+          "options": [
+            { "value": "aac", "label": "AAC" },
+            { "value": "libmp3lame", "label": "MP3" },
+            { "value": "libopus", "label": "Opus" },
+            { "value": "flac", "label": "FLAC" },
+            { "value": "copy", "label": "Copy (no re-encode)" }
+          ]
+        },
+        {
+          "id": "audioBitrate",
+          "label": "Audio bitrate",
+          "group": "audio",
+          "type": "string",
+          "default": "128k",
+          "visibleWhen": { "ne": [{ "param": "audioCodec" }, { "literal": "copy" }] }
+        },
+        {
+          "id": "audioChannels",
+          "label": "Audio channels",
+          "group": "audio",
+          "type": "enum",
+          "default": "2",
+          "options": [
+            { "value": "1", "label": "Mono (1)" },
+            { "value": "2", "label": "Stereo (2)" },
+            { "value": "6", "label": "5.1 Surround (6)" }
+          ]
+        },
+        {
+          "id": "trimEnabled",
+          "label": "Enable trim",
+          "group": "trim",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "id": "trimStart",
+          "label": "Start time",
+          "help": "Format: HH:MM:SS.mmm or seconds",
+          "group": "trim",
+          "type": "string",
+          "default": "0",
+          "visibleWhen": { "set": { "param": "trimEnabled" } }
+        },
+        {
+          "id": "trimEnd",
+          "label": "End time",
+          "help": "Format: HH:MM:SS.mmm or seconds",
+          "group": "trim",
+          "type": "string",
+          "default": "0",
+          "visibleWhen": { "set": { "param": "trimEnabled" } }
+        },
+        {
+          "id": "cropEnabled",
+          "label": "Enable crop",
+          "group": "crop",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "id": "cropWidth",
+          "label": "Crop width",
+          "group": "crop",
+          "type": "int",
+          "default": 1280,
+          "min": 1,
+          "visibleWhen": { "set": { "param": "cropEnabled" } }
+        },
+        {
+          "id": "cropHeight",
+          "label": "Crop height",
+          "group": "crop",
+          "type": "int",
+          "default": 720,
+          "min": 1,
+          "visibleWhen": { "set": { "param": "cropEnabled" } }
+        },
+        {
+          "id": "cropX",
+          "label": "Crop X offset",
+          "help": "Leave empty to center horizontally",
+          "group": "crop",
+          "type": "int",
+          "min": 0,
+          "visibleWhen": { "set": { "param": "cropEnabled" } }
+        },
+        {
+          "id": "cropY",
+          "label": "Crop Y offset",
+          "help": "Leave empty to center vertically",
+          "group": "crop",
+          "type": "int",
+          "min": 0,
+          "visibleWhen": { "set": { "param": "cropEnabled" } }
+        },
+        {
+          "id": "rotate",
+          "label": "Rotate",
+          "group": "transforms",
+          "type": "enum",
+          "default": "0",
+          "options": [
+            { "value": "0", "label": "None" },
+            { "value": "90", "label": "90° clockwise" },
+            { "value": "-90", "label": "90° counter-clockwise" },
+            { "value": "180", "label": "180°" }
+          ]
+        },
+        {
+          "id": "flipHorizontal",
+          "label": "Flip horizontal",
+          "group": "transforms",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "id": "flipVertical",
+          "label": "Flip vertical",
+          "group": "transforms",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "id": "grayscale",
+          "label": "Grayscale",
+          "group": "filters",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "id": "saturation",
+          "label": "Saturation",
+          "group": "filters",
+          "type": "float",
+          "default": 1,
+          "min": 0,
+          "max": 3,
+          "step": 0.1
+        },
+        {
+          "id": "blur",
+          "label": "Blur",
+          "group": "filters",
+          "type": "float",
+          "default": 0,
+          "min": 0,
+          "max": 10,
+          "step": 0.1
+        },
+        {
+          "id": "sharpen",
+          "label": "Sharpen",
+          "group": "filters",
+          "type": "float",
+          "default": 0,
+          "min": 0,
+          "max": 10,
+          "step": 0.1
+        },
+        {
+          "id": "watermarkEnabled",
+          "label": "Enable watermark",
+          "group": "watermark",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "id": "watermarkAnchor",
+          "label": "Position",
+          "group": "watermark",
+          "type": "enum",
+          "default": "br",
+          "options": [
+            { "value": "tl", "label": "Top left" },
+            { "value": "tc", "label": "Top center" },
+            { "value": "tr", "label": "Top right" },
+            { "value": "ml", "label": "Middle left" },
+            { "value": "mc", "label": "Middle center" },
+            { "value": "mr", "label": "Middle right" },
+            { "value": "bl", "label": "Bottom left" },
+            { "value": "bc", "label": "Bottom center" },
+            { "value": "br", "label": "Bottom right" }
+          ],
+          "visibleWhen": { "set": { "param": "watermarkEnabled" } }
+        },
+        {
+          "id": "watermarkMargin",
+          "label": "Margin (px)",
+          "group": "watermark",
+          "type": "int",
+          "default": 10,
+          "min": 0,
+          "max": 100,
+          "visibleWhen": { "set": { "param": "watermarkEnabled" } }
+        },
+        {
+          "id": "watermarkOpacity",
+          "label": "Opacity",
+          "group": "watermark",
+          "type": "float",
+          "default": 1,
+          "min": 0,
+          "max": 1,
+          "step": 0.05,
+          "visibleWhen": { "set": { "param": "watermarkEnabled" } }
+        },
+        {
+          "id": "gifWidth",
+          "label": "GIF width",
+          "group": "gif",
+          "type": "int",
+          "default": 480,
+          "min": 1,
+          "max": 1920,
+          "visibleWhen": { "eq": [{ "param": "outputFormat" }, { "literal": "gif" }] }
+        },
+        {
+          "id": "gifFps",
+          "label": "GIF FPS",
+          "group": "gif",
+          "type": "int",
+          "default": 15,
+          "min": 1,
+          "max": 60,
+          "visibleWhen": { "eq": [{ "param": "outputFormat" }, { "literal": "gif" }] }
+        },
+        {
+          "id": "gifLoop",
+          "label": "Loop count",
+          "help": "0 = infinite loop",
+          "group": "gif",
+          "type": "int",
+          "default": 0,
+          "min": 0,
+          "visibleWhen": { "eq": [{ "param": "outputFormat" }, { "literal": "gif" }] }
+        },
+        {
+          "id": "gifDither",
+          "label": "Dither algorithm",
+          "group": "gif",
+          "type": "enum",
+          "default": "bayer",
+          "options": [
+            { "value": "bayer", "label": "Bayer" },
+            { "value": "sierra2_4a", "label": "Sierra 2-4A" },
+            { "value": "none", "label": "None" }
+          ],
+          "visibleWhen": { "eq": [{ "param": "outputFormat" }, { "literal": "gif" }] }
+        }
+      ],
+      "args": [
+        {
+          "kind": "flag",
+          "flag": "-y",
+          "when": { "eq": [{ "param": "collisionMode" }, { "literal": "overwrite" }] }
+        },
+        {
+          "kind": "flag",
+          "flag": "-n",
+          "when": { "eq": [{ "param": "collisionMode" }, { "literal": "suffix" }] }
+        },
+        {
+          "kind": "group",
+          "when": { "set": { "param": "trimEnabled" } },
+          "args": [
+            { "kind": "option", "flag": "-ss", "value": { "param": "trimStart" } },
+            { "kind": "option", "flag": "-to", "value": { "param": "trimEnd" } }
+          ]
+        },
+        {
+          "kind": "option",
+          "flag": "-i",
+          "value": { "in": "input" }
+        },
+        {
+          "kind": "group",
+          "when": { "and": [{ "set": { "param": "watermarkEnabled" } }, { "set": { "in": "watermark" } }] },
+          "args": [
+            { "kind": "option", "flag": "-i", "value": { "in": "watermark" } }
+          ]
+        },
+        {
+          "kind": "option",
+          "flag": "-c:v",
+          "value": {
+            "join": {
+              "sep": "",
+              "items": [
+                {
+                  "when": { "eq": [{ "param": "outputFormat" }, { "literal": "gif" }] },
+                  "value": { "literal": "" }
+                },
+                {
+                  "when": { "and": [{ "unset": { "param": "videoEnabled" } }, { "ne": [{ "param": "outputFormat" }, { "literal": "gif" }] }] },
+                  "value": { "literal": "" }
+                },
+                {
+                  "value": { "param": "videoCodec" }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "kind": "flag",
+          "flag": "-vn",
+          "when": { "and": [{ "unset": { "param": "videoEnabled" } }, { "ne": [{ "param": "outputFormat" }, { "literal": "gif" }] }] }
+        },
+        {
+          "kind": "group",
+          "when": { "and": [
+            { "ne": [{ "param": "videoCodec" }, { "literal": "copy" }] },
+            { "ne": [{ "param": "outputFormat" }, { "literal": "gif" }] }
+          ]},
+          "args": [
+            {
+              "kind": "group",
+              "when": { "or": [{ "eq": [{ "param": "videoCodec" }, { "literal": "libx264" }] }, { "eq": [{ "param": "videoCodec" }, { "literal": "libx265" }] }] },
+              "args": [
+                { "kind": "option", "flag": "-preset", "value": { "param": "preset" } }
+              ]
+            },
+            {
+              "kind": "group",
+              "when": { "eq": [{ "param": "rateControl" }, { "literal": "crf" }] },
+              "args": [
+                { "kind": "option", "flag": "-crf", "value": { "param": "crf" } },
+                {
+                  "kind": "group",
+                  "when": { "or": [{ "eq": [{ "param": "videoCodec" }, { "literal": "libvpx-vp9" }] }, { "eq": [{ "param": "videoCodec" }, { "literal": "libaom-av1" }] }] },
+                  "args": [
+                    { "kind": "option", "flag": "-b:v", "value": { "literal": "0" } }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "option",
+              "flag": "-b:v",
+              "value": { "param": "bitrate" },
+              "when": { "eq": [{ "param": "rateControl" }, { "literal": "bitrate" }] }
+            },
+            {
+              "kind": "group",
+              "when": { "or": [{ "eq": [{ "param": "videoCodec" }, { "literal": "libvpx-vp9" }] }, { "eq": [{ "param": "videoCodec" }, { "literal": "libaom-av1" }] }] },
+              "args": [
+                { "kind": "option", "flag": "-cpu-used", "value": { "param": "cpuUsed" } },
+                { "kind": "option", "flag": "-row-mt", "value": { "literal": "1" } },
+                {
+                  "kind": "option",
+                  "flag": "-deadline",
+                  "value": { "literal": "good" },
+                  "when": { "eq": [{ "param": "videoCodec" }, { "literal": "libvpx-vp9" }] }
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "when": { "set": { "param": "webOptimized" } },
+              "args": [
+                { "kind": "option", "flag": "-pix_fmt", "value": { "literal": "yuv420p" } },
+                {
+                  "kind": "option",
+                  "flag": "-tag:v",
+                  "value": { "literal": "hvc1" },
+                  "when": { "and": [{ "eq": [{ "param": "videoCodec" }, { "literal": "libx265" }] }, { "eq": [{ "param": "outputFormat" }, { "literal": "mp4" }] }] }
+                }
+              ]
+            },
+            {
+              "kind": "option",
+              "flag": "-r",
+              "value": { "param": "fps" },
+              "when": { "set": { "param": "fps" } }
+            },
+            {
+              "kind": "group",
+              "when": { "set": { "param": "keyframeEnabled" } },
+              "args": [
+                {
+                  "kind": "group",
+                  "when": { "eq": [{ "param": "videoCodec" }, { "literal": "libx264" }] },
+                  "args": [
+                    { "kind": "option", "flag": "-g", "value": { "param": "keyframeInterval" } },
+                    { "kind": "option", "flag": "-keyint_min", "value": { "param": "keyframeInterval" } },
+                    { "kind": "option", "flag": "-sc_threshold", "value": { "literal": "0" } }
+                  ]
+                },
+                {
+                  "kind": "group",
+                  "when": { "eq": [{ "param": "videoCodec" }, { "literal": "libx265" }] },
+                  "args": [
+                    {
+                      "kind": "option",
+                      "flag": "-x265-params",
+                      "value": {
+                        "format": "keyint={keyframeInterval}:min-keyint={keyframeInterval}:scenecut=0"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "kind": "group",
+                  "when": { "or": [{ "eq": [{ "param": "videoCodec" }, { "literal": "libvpx-vp9" }] }, { "eq": [{ "param": "videoCodec" }, { "literal": "libaom-av1" }] }] },
+                  "args": [
+                    { "kind": "option", "flag": "-g", "value": { "param": "keyframeInterval" } },
+                    { "kind": "option", "flag": "-keyint_min", "value": { "param": "keyframeInterval" } }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "when": { "eq": [{ "param": "outputFormat" }, { "literal": "gif" }] },
+          "args": [
+            { "kind": "flag", "flag": "-an" }
+          ]
+        },
+        {
+          "kind": "group",
+          "when": { "and": [
+            { "ne": [{ "param": "outputFormat" }, { "literal": "gif" }] },
+            { "unset": { "param": "audioEnabled" } }
+          ]},
+          "args": [
+            { "kind": "flag", "flag": "-an" }
+          ]
+        },
+        {
+          "kind": "group",
+          "when": { "and": [
+            { "ne": [{ "param": "outputFormat" }, { "literal": "gif" }] },
+            { "set": { "param": "audioEnabled" } }
+          ]},
+          "args": [
+            { "kind": "option", "flag": "-c:a", "value": { "param": "audioCodec" } },
+            {
+              "kind": "option",
+              "flag": "-b:a",
+              "value": { "param": "audioBitrate" },
+              "when": { "and": [{ "ne": [{ "param": "audioCodec" }, { "literal": "copy" }] }, { "ne": [{ "param": "audioCodec" }, { "literal": "flac" }] }] }
+            },
+            { "kind": "option", "flag": "-ac", "value": { "param": "audioChannels" }, "when": { "ne": [{ "param": "audioCodec" }, { "literal": "copy" }] } }
+          ]
+        },
+        {
+          "kind": "group",
+          "when": { "and": [{ "eq": [{ "param": "outputFormat" }, { "literal": "mp4" }] }, { "set": { "param": "webOptimized" } }] },
+          "args": [
+            { "kind": "option", "flag": "-movflags", "value": { "literal": "+faststart" } }
+          ]
+        },
+        {
+          "kind": "group",
+          "when": { "eq": [{ "param": "outputFormat" }, { "literal": "gif" }] },
+          "args": [
+            { "kind": "option", "flag": "-loop", "value": { "param": "gifLoop" } }
+          ]
+        },
+        { "kind": "flag", "flag": "-sn" },
+        { "kind": "flag", "flag": "-dn" },
+        { "kind": "positional", "value": { "out": "output" } }
+      ],
+      "progress": {
+        "parser": "ffmpeg-progress",
+        "cancel": "stdin-q",
+        "durationFrom": "probe"
+      }
+    }
+  ],
+  "smoke": {
+    "helpArgs": ["-version"],
+    "mustMention": ["ffmpeg", "configuration"]
+  }
+}

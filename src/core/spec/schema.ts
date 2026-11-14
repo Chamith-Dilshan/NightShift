@@ -233,39 +233,7 @@ export const ParamDefSchema = z.object({
 
 export type ParamDef = z.infer<typeof ParamDefSchema>;
 
-// ─── ArgNode ───
-
-export const ArgNodeSchema: z.ZodType<ArgNode> = z.lazy(() =>
-  z.discriminatedUnion("kind", [
-    z.object({
-      kind: z.literal("flag"),
-      flag: z.string(),
-      when: ExprSchema.optional(),
-    }),
-    z.object({
-      kind: z.literal("option"),
-      flag: z.string(),
-      value: ValueExprSchema,
-      style: z.enum(["separate", "equals", "concat"]).optional(),
-      when: ExprSchema.optional(),
-    }),
-    z.object({
-      kind: z.literal("positional"),
-      value: ValueExprSchema,
-      when: ExprSchema.optional(),
-    }),
-    z.object({
-      kind: z.literal("group"),
-      when: ExprSchema.optional(),
-      args: ArgNodeSchema.array(),
-    }),
-    z.object({
-      kind: z.literal("repeat"),
-      param: z.string(),
-      node: ArgNodeSchema,
-    }),
-  ])
-);
+// ─── ArgNode type alias ───
 
 export type ArgNode = z.infer<typeof ArgNodeSchema>;
 
