@@ -76,8 +76,8 @@ Authoritative current-state detail: `APP_ARCHITECTURE.md`. Release specifics: th
 | Version | Status | Theme | Highlights |
 |---|---|---|---|
 | **0.1** | Done | The FFmpeg release | Tauri + Next.js app, Rust runner, tool manager, video tool (trim, crop, keyframes, web-optimized, GIF, watermark), queue, templates, installers, updater |
-| **0.2** | Planned | Platform core | ToolSpec engine, generic tool manager and catalog, custom tools, **libvips** as second tool, **templates** (library, import/export, safe-import review), **batch**; workflow file format designed but not executed |
-| **0.3** | Planned | Workflows | Multi-node execution, typed ports, temp workspaces, caching and partial reruns, headless CLI (`nightshift run`), folder-watch trigger |
+| **0.2** | In progress | Platform core | ToolSpec engine, generic tool manager and catalog, custom tools, **libvips** as second tool, **templates** (library, import/export, safe-import review), **batch**; workflow file format designed but not executed |
+| **0.3** | Planned | Workflows | Multi-node execution, typed ports, temp workspaces, caching and partial reruns, headless CLI (`nightshift run`), folder-watch trigger — [design document](docs/WORKFLOWS_DESIGN.md) |
 | **0.4** | Planned | Editor + extensions | Visual node editor, interactive terminal (PTY), extension runtime (on-demand, token-authenticated Python), more tools (audio, forensics) |
 | **0.5+** | Vision | Ecosystem | Signed template/spec registry or marketplace, LLM/HTTP nodes (BYO key or local models), scheduling, tool update checks |
 | Unscheduled | Backlog | Polish | Code signing/notarization, run history, spec authoring UI, localisation |
@@ -150,6 +150,7 @@ Known packaging reality: libvips publishes official Windows binaries, but macOS/
 | Oct 2026 | Workflows (ComfyUI-style) are the long-term vision; v0.2 is **design-only** for multi-step chains | Templates are stored as one-node workflows so v0.3 is additive |
 | Oct 2026 | `ffprobe` becomes a helper binary of the `ffmpeg` tool | One tool, two binaries |
 | Oct 2026 | FFmpeg keeps its builtin rich panel/builder; generic tools use spec-generated panels | Avoids regression, proves the platform with libvips |
+| Nov 2026 | Workflow design document completed | `docs/WORKFLOWS_DESIGN.md` covers 14 sections: data model, execution, caching, failure semantics, headless runner, triggers, security, migration — see [design doc](docs/WORKFLOWS_DESIGN.md) |
 
 ## 14. Open questions
 

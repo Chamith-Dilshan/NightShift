@@ -9,6 +9,65 @@ export interface ReviewWarning {
   message: string;
 }
 
+// ─── Graph validation errors ───
+
+/**
+ * A graph validation error that prevents import.
+ * These are hard rejections, not warnings.
+ */
+export interface GraphValidationError {
+  /** Human-readable error message */
+  message: string;
+  /** Category for programmatic handling */
+  category: "multi-node" | "edges" | "input-ref";
+}
+
+/**
+ * Validate the graph structure of a template for v0.2 compatibility.
+ * Returns an array of validation errors; empty array means the graph is valid.
+ *
+ * In v0.2, templates must have exactly one node, no edges, and only `$input`
+ * references. This function checks those constraints and returns specific
+ * error messages for each violation.
+ *
+ * Note: The Zod schema already enforces edges=[] and inputs=$input at parse time.
+ * This function is used after parsing to provide user-friendly rejection messages
+ * when a template with a newer schema version (that allows multi-node) is imported.
+ */
+export function validateGraph(template: NightShiftTemplate): GraphValidationError[] {
+  const errors: GraphValidationError[] = [];
+
+  // 1. Multi-node graph — v0.2 supports exactly one node
+  if (template.graph.nodes.length > 1) {
+    errors.push({
+      message: "Workflows with several steps need a newer NightShift.",
+      category: "multi-node",
+    });
+  }
+
+  // 2. Non-empty edges — v0.2 does not support edge wiring
+  if (template.graph.edges.length > 0) {
+    errors.push({
+      message: "Workflows with several steps need a newer NightShift.",
+      category: "edges",
+    });
+  }
+
+  // 3. Non-$input references — v0.2 only allows $input
+  for (const node of template.graph.nodes) {
+    for (const [portId, source] of Object.entries(node.inputs)) {
+      if (source.from !== "$input") {
+        errors.push({
+          message: `Node "${node.id}" port "${portId}" references "${source.from}" — only $input is supported in this version.`,
+          category: "input-ref",
+        });
+      }
+    }
+  }
+
+  return errors;
+}
+
 // ─── URL schemes to warn about ───
 
 const URL_SCHEMES = [

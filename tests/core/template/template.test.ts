@@ -16,7 +16,7 @@ import {
   stripForExport,
   validateRawConstraints,
 } from "@/core/template/io";
-import { reviewTemplate, ReviewWarning } from "@/core/template/review";
+import { reviewTemplate, ReviewWarning, validateGraph } from "@/core/template/review";
 import { resolveToken, resolveRawArgv, validateVariableReferences } from "@/core/template/variables";
 
 const makeTemplate = (overrides = {}): NightShiftTemplate => ({
@@ -547,5 +547,148 @@ describe("canonicalization", () => {
     const parsed = JSON.parse(json);
     const result = validateTemplate(parsed);
     expect(result.ok).toBe(true);
+  });
+});
+
+describe("graph validation (T-7.1)", () => {
+  it("accepts a valid single-node graph", () => {
+    const tpl = makeTemplate();
+    const errors = validateGraph(tpl);
+    expect(errors).toHaveLength(0);
+  });
+
+  it("rejects multi-node graph", () => {
+    const tpl = makeTemplate({
+      graph: {
+        nodes: [
+          {
+            id: "n1",
+            tool: "ffmpeg",
+            command: "transcode",
+            mode: "params",
+            inputs: { in: { from: "$input" } },
+            output: {},
+          },
+          {
+            id: "n2",
+            tool: "vips",
+            command: "convert",
+            mode: "params",
+            inputs: { in: { from: "$input" } },
+            output: {},
+          },
+        ],
+        edges: [],
+      },
+    });
+    const errors = validateGraph(tpl);
+    expect(errors.length).toBeGreaterThanOrEqual(1);
+    const multiNode = errors.find((e) => e.category === "multi-node");
+    expect(multiNode).toBeDefined();
+    expect(multiNode?.message).toContain("several steps");
+  });
+
+  it("rejects non-empty edges", () => {
+    // Note: Zod schema rejects this at parse time, but validateGraph
+    // still checks it for templates parsed with a looser schema
+    const tpl = makeTemplate({
+      graph: {
+        nodes: [
+          {
+            id: "n1",
+            tool: "ffmpeg",
+            command: "transcode",
+            mode: "params",
+            inputs: { in: { from: "$input" } },
+            output: {},
+          },
+        ],
+        edges: [{ from: "n1.out", to: "n2.in" }] as any,
+      },
+    }) as any;
+    const errors = validateGraph(tpl);
+    expect(errors.length).toBeGreaterThanOrEqual(1);
+    const edges = errors.find((e) => e.category === "edges");
+    expect(edges).toBeDefined();
+    expect(edges?.message).toContain("several steps");
+  });
+
+  it("rejects non-$input references", () => {
+    const tpl = makeTemplate({
+      graph: {
+        nodes: [
+          {
+            id: "n1",
+            tool: "ffmpeg",
+            command: "transcode",
+            mode: "params",
+            inputs: { in: { from: "n2.out" } as any },
+            output: {},
+          },
+        ],
+        edges: [],
+      },
+    }) as any;
+    const errors = validateGraph(tpl);
+    expect(errors.length).toBeGreaterThanOrEqual(1);
+    const inputRef = errors.find((e) => e.category === "input-ref");
+    expect(inputRef).toBeDefined();
+    expect(inputRef?.message).toContain("n2.out");
+    expect(inputRef?.message).toContain("$input");
+  });
+
+  it("reports multiple errors for a multi-node graph with edges", () => {
+    const tpl = makeTemplate({
+      graph: {
+        nodes: [
+          {
+            id: "n1",
+            tool: "ffmpeg",
+            command: "transcode",
+            mode: "params",
+            inputs: { in: { from: "$input" } },
+            output: {},
+          },
+          {
+            id: "n2",
+            tool: "vips",
+            command: "convert",
+            mode: "params",
+            inputs: { in: { from: "n1.out" } as any },
+            output: {},
+          },
+        ],
+        edges: [{ from: "n1.out", to: "n2.in" }] as any,
+      },
+    }) as any;
+    const errors = validateGraph(tpl);
+    expect(errors.length).toBeGreaterThanOrEqual(3);
+    const categories = errors.map((e) => e.category);
+    expect(categories).toContain("multi-node");
+    expect(categories).toContain("edges");
+    expect(categories).toContain("input-ref");
+  });
+
+  it("accepts graph with only $input references", () => {
+    const tpl = makeTemplate({
+      graph: {
+        nodes: [
+          {
+            id: "n1",
+            tool: "ffmpeg",
+            command: "transcode",
+            mode: "params",
+            inputs: {
+              in: { from: "$input" },
+              watermark: { from: "$input" },
+            },
+            output: {},
+          },
+        ],
+        edges: [],
+      },
+    });
+    const errors = validateGraph(tpl);
+    expect(errors).toHaveLength(0);
   });
 });
