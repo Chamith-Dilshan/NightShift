@@ -109,6 +109,11 @@ export function compareVersions(a: string, b: string): number {
   const partsA = parseVersion(a);
   const partsB = parseVersion(b);
 
+  // If either version is unparseable, treat as equal (caller may warn)
+  if (partsA.length === 0 || partsB.length === 0) {
+    return 0;
+  }
+
   const len = Math.max(partsA.length, partsB.length);
   for (let i = 0; i < len; i++) {
     const pa = i < partsA.length ? partsA[i] : 0;
