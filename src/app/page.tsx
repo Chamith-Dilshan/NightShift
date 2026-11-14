@@ -16,7 +16,6 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchToolStatus } from "@/store/tools/toolsSlice";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ComingSoon } from "@/components/ComingSoon";
 import {AnimatedThemeToggler} from "@/components/ui/animated-theme-toggler";
 import Image from "next/image";
 
@@ -82,20 +81,20 @@ export default function HomePage() {
         <div className="space-y-3 max-w-2xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-primary/10 text-primary border border-primary/20">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>v0.1.0 Desktop Release</span>
+            <span>v0.2.0 — Platform for CLI Tools</span>
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
-            Precision Media Conversion &amp; Codec Processing
+            Desktop Platform for Command-Line Tools
           </h2>
           <p className="text-sm text-muted-foreground leading-relaxed font-sans">
-            Hardware-accelerated visual command studio for FFmpeg. Native process execution, real-time log streaming, and zero bundled sidecars.
+            Install the tools you need, run them through visual forms or raw commands, save reusable templates, and process whole folders. FFmpeg and libvips included.
           </p>
         </div>
 
-        {/* Studio Tools Grid */}
+        {/* Tool Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
-          {/* Video Tool (Active) */}
-          <Link href="/video" className="group">
+          {/* FFmpeg Tool */}
+          <Link href="/tool?id=ffmpeg" className="group">
             <Card className="h-full bg-card/80 border border-border hover:border-primary/60 transition-all duration-200 shadow-xl group-hover:shadow-primary/5 rounded-2xl overflow-hidden flex flex-col justify-between">
               <CardContent className="p-6 space-y-4">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -103,40 +102,76 @@ export default function HomePage() {
                 </div>
                 <div className="space-y-1.5">
                   <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors flex items-center justify-between">
-                    <span>Video Studio</span>
+                    <span>FFmpeg</span>
                     <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-primary" />
                   </h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Transcode, crop, trim, adjust bitrates, add watermarks, and generate web-optimized MP4, WebM, and GIF clips.
+                    Video, audio, and GIF conversion with filters, watermark overlay, and codec control.
                   </p>
                 </div>
               </CardContent>
               <div className="px-6 py-3 bg-muted/40 border-t border-border/60 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
-                <span>FFmpeg Engine</span>
-                <span className="text-primary font-semibold">Ready</span>
+                <span>Video &amp; Audio</span>
+                <span className="text-primary font-semibold">
+                  {isInstalled ? "Ready" : "Install needed"}
+                </span>
               </div>
             </Card>
           </Link>
 
-          {/* WebP Studio (Coming Soon) */}
-          <ComingSoon
-            title="WebP & Image Optimizer"
-            description="Batch image compression and WebP/AVIF generation with multi-threaded encoder presets."
-            icon={ImageIcon}
-          />
+          {/* libvips Tool */}
+          <Link href="/tool?id=vips" className="group">
+            <Card className="h-full bg-card/80 border border-border hover:border-primary/60 transition-all duration-200 shadow-xl group-hover:shadow-primary/5 rounded-2xl overflow-hidden flex flex-col justify-between">
+              <CardContent className="p-6 space-y-4">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <ImageIcon className="w-5 h-5" />
+                </div>
+                <div className="space-y-1.5">
+                  <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>libvips</span>
+                    <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-primary" />
+                  </h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Fast, low-memory image processing — resize, convert, and optimize images.
+                  </p>
+                </div>
+              </CardContent>
+              <div className="px-6 py-3 bg-muted/40 border-t border-border/60 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+                <span>Image</span>
+                <span className="text-muted-foreground font-semibold">Install needed</span>
+              </div>
+            </Card>
+          </Link>
 
-          {/* Declarative Custom Tabs (Coming Soon) */}
-          <ComingSoon
-            title="Custom Tool Builder"
-            description="Declarative schema editor and custom FFmpeg pipeline orchestrator."
-            icon={FileCode}
-          />
+          {/* View Catalog */}
+          <Link href="/tools" className="group">
+            <Card className="h-full bg-card/80 border border-border hover:border-primary/60 transition-all duration-200 shadow-xl group-hover:shadow-primary/5 rounded-2xl overflow-hidden flex flex-col justify-between">
+              <CardContent className="p-6 space-y-4">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <FileCode className="w-5 h-5" />
+                </div>
+                <div className="space-y-1.5">
+                  <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors flex items-center justify-between">
+                    <span>Full Catalog</span>
+                    <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-primary" />
+                  </h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Browse all available tools, install new ones, and add your own custom executables.
+                  </p>
+                </div>
+              </CardContent>
+              <div className="px-6 py-3 bg-muted/40 border-t border-border/60 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+                <span>Tool Manager</span>
+                <span className="text-primary font-semibold">Open</span>
+              </div>
+            </Card>
+          </Link>
         </div>
       </main>
 
       {/* Footer */}
       <footer className="border-t border-border/80 px-8 py-4 text-center text-xs font-mono text-muted-foreground">
-        NightShift v0.1.0 • Built with Tauri v2 + Next.js + Redux Toolkit
+        NightShift v0.2.0 • Platform for CLI tools
       </footer>
     </div>
   );
