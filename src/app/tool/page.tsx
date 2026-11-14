@@ -19,6 +19,7 @@ import { openTool, setMode, setInputs, addInputs } from "@/store/workbench/workb
 import { fetchToolStatus } from "@/store/tools/toolsSlice";
 import { SpecPanel } from "@/components/workbench/SpecPanel";
 import { CommandPreview } from "@/components/workbench/CommandPreview";
+import { BatchPanel } from "@/components/batch/BatchPanel";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ToolSpec } from "@/core/spec/schema";
@@ -264,6 +265,11 @@ function ToolWorkbenchContent() {
             <Play className="w-4 h-4 mr-2" />
             {isInstalled ? "Run" : "Install tool first"}
           </Button>
+
+          {/* Batch Processing */}
+          {spec && isInstalled && (
+            <BatchPanel toolId={toolId} defaultInputs={session?.inputs ?? []} />
+          )}
 
           {!isInstalled && (
             <Card className="p-4 bg-accent/10 border-accent/20">

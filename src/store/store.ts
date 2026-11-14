@@ -4,6 +4,7 @@ import templatesReducer from "./templates/templatesSlice";
 import jobsReducer from "./jobs/jobsSlice";
 import toolsReducer from "./tools/toolsSlice";
 import workbenchReducer from "./workbench/workbenchSlice";
+import batchesReducer from "./batches/batchesSlice";
 import { persistenceListener } from "./persistence/listener";
 
 export const store = configureStore({
@@ -13,6 +14,7 @@ export const store = configureStore({
     jobs: jobsReducer,
     tools: toolsReducer,
     workbench: workbenchReducer,
+    batches: batchesReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().prepend(persistenceListener.middleware),
