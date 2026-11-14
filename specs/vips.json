@@ -1,0 +1,394 @@
+{
+  "schemaVersion": 1,
+  "id": "vips",
+  "name": "libvips",
+  "description": "Fast, low-memory image processing — resize, convert, and optimize images.",
+  "category": "image",
+  "homepage": "https://libvips.org",
+  "license": {
+    "name": "LGPL-3.0",
+    "url": "https://www.gnu.org/licenses/lgpl-3.0.html",
+    "note": "libvips is released under LGPL. Some optional features may have different licences."
+  },
+  "testedWith": ["8.18"],
+  "binaries": [
+    {
+      "id": "vips",
+      "role": "primary",
+      "names": {
+        "windows": "vips.exe",
+        "unix": "vips"
+      }
+    },
+    {
+      "id": "vipsthumbnail",
+      "role": "helper",
+      "names": {
+        "windows": "vipsthumbnail.exe",
+        "unix": "vipsthumbnail"
+      }
+    },
+    {
+      "id": "vipsheader",
+      "role": "helper",
+      "names": {
+        "windows": "vipsheader.exe",
+        "unix": "vipsheader"
+      }
+    }
+  ],
+  "install": {
+    "manifestId": "vips",
+    "sources": ["managed", "system", "custom"],
+    "detect": {
+      "binary": "vips",
+      "versionArgs": ["--version"],
+      "versionRegex": "vips-(\\d+\\.\\d+(\\.\\d+)?)",
+      "minVersion": "8.0"
+    },
+    "hints": {
+      "windows": "Download from https://github.com/libvips/libvips/releases",
+      "macos": "Install with Homebrew: brew install vips",
+      "linux": "Install with your package manager: sudo apt install libvips-tools"
+    }
+  },
+  "probes": {
+    "input": {
+      "binary": "vipsheader",
+      "args": ["-a", "{in:src}"],
+      "parse": {
+        "kind": "lines"
+      }
+    }
+  },
+  "commands": [
+    {
+      "id": "thumbnail",
+      "name": "Thumbnail",
+      "description": "Resize images to fit a target size, optionally cropping to fill.",
+      "binary": "vipsthumbnail",
+      "inputs": [
+        {
+          "id": "src",
+          "label": "Input image",
+          "kind": "file",
+          "accepts": {
+            "types": ["image"],
+            "extensions": [".png", ".jpg", ".jpeg", ".webp", ".tiff", ".tif", ".bmp", ".gif", ".svg"]
+          },
+          "required": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "dst",
+          "label": "Output file",
+          "kind": "file",
+          "required": true,
+          "ext": {
+            "map": {
+              "param": "format",
+              "table": {
+                "jpg": ".jpg",
+                "png": ".png",
+                "webp": ".webp",
+                "tiff": ".tiff",
+                "custom": ".{customExt}"
+              }
+            }
+          }
+        }
+      ],
+      "groups": [
+        { "id": "output", "label": "Output", "order": 1 },
+        { "id": "size", "label": "Size", "order": 2 },
+        { "id": "quality", "label": "Quality", "order": 3 },
+        { "id": "advanced", "label": "Advanced", "order": 4 }
+      ],
+      "params": [
+        {
+          "id": "format",
+          "label": "Output format",
+          "group": "output",
+          "type": "enum",
+          "default": "jpg",
+          "options": [
+            { "value": "jpg", "label": "JPEG" },
+            { "value": "png", "label": "PNG" },
+            { "value": "webp", "label": "WebP" },
+            { "value": "tiff", "label": "TIFF" },
+            { "value": "custom", "label": "Custom extension" }
+          ]
+        },
+        {
+          "id": "customExt",
+          "label": "Custom extension",
+          "help": "File extension without the dot",
+          "group": "output",
+          "type": "string",
+          "default": "jpg",
+          "visibleWhen": { "eq": [{ "param": "format" }, { "literal": "custom" }] }
+        },
+        {
+          "id": "width",
+          "label": "Width",
+          "group": "size",
+          "type": "int",
+          "default": 800,
+          "min": 1,
+          "max": 100000
+        },
+        {
+          "id": "height",
+          "label": "Height",
+          "help": "Leave empty to auto-calculate from width preserving aspect ratio.",
+          "group": "size",
+          "type": "int",
+          "min": 1,
+          "max": 100000
+        },
+        {
+          "id": "smartcrop",
+          "label": "Smart crop to fill",
+          "help": "Shrink and crop to exactly fill the target size, keeping important content.",
+          "group": "size",
+          "type": "bool",
+          "default": false,
+          "visibleWhen": { "set": { "param": "height" } }
+        },
+        {
+          "id": "quality",
+          "label": "Quality",
+          "help": "1-100, higher = better quality, larger file.",
+          "group": "quality",
+          "type": "int",
+          "default": 80,
+          "min": 1,
+          "max": 100,
+          "visibleWhen": { "in": [{ "param": "format" }, ["jpg", "webp", "tiff"]] }
+        },
+        {
+          "id": "strip",
+          "label": "Strip metadata",
+          "help": "Remove EXIF, IPTC, XMP and other metadata to reduce file size.",
+          "group": "advanced",
+          "type": "bool",
+          "default": true
+        },
+        {
+          "id": "linear",
+          "label": "Linear resampling",
+          "help": "Process in linear color space for better quality (slower).",
+          "group": "advanced",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "id": "noRotate",
+          "label": "Disable auto-rotate",
+          "help": "Don't auto-rotate based on EXIF orientation tag.",
+          "group": "advanced",
+          "type": "bool",
+          "default": false
+        }
+      ],
+      "args": [
+        {
+          "kind": "option",
+          "flag": "--size",
+          "value": {
+            "format": "{width}x{height}"
+          },
+          "style": "concat"
+        },
+        {
+          "kind": "flag",
+          "flag": "-m",
+          "when": { "set": { "param": "smartcrop" } }
+        },
+        {
+          "kind": "flag",
+          "flag": "-a",
+          "when": { "eq": [{ "param": "linear" }, { "literal": true }] }
+        },
+        {
+          "kind": "flag",
+          "flag": "--no-rotate",
+          "when": { "eq": [{ "param": "noRotate" }, { "literal": true }] }
+        },
+        {
+          "kind": "positional",
+          "value": { "in": "src" }
+        },
+        {
+          "kind": "option",
+          "flag": "--size",
+          "value": { "param": "width" },
+          "style": "concat",
+          "when": { "unset": { "param": "height" } }
+        }
+      ],
+      "progress": {
+        "parser": "none"
+      }
+    },
+    {
+      "id": "convert",
+      "name": "Convert / Re-encode",
+      "description": "Re-encode an image to a different format with quality control.",
+      "binary": "vips",
+      "inputs": [
+        {
+          "id": "src",
+          "label": "Input image",
+          "kind": "file",
+          "accepts": {
+            "types": ["image"],
+            "extensions": [".png", ".jpg", ".jpeg", ".webp", ".tiff", ".tif", ".bmp", ".gif", ".svg"]
+          },
+          "required": true
+        }
+      ],
+      "outputs": [
+        {
+          "id": "dst",
+          "label": "Output file",
+          "kind": "file",
+          "required": true,
+          "ext": {
+            "map": {
+              "param": "format",
+              "table": {
+                "jpg": ".jpg",
+                "png": ".png",
+                "webp": ".webp",
+                "tiff": ".tiff",
+                "bmp": ".bmp",
+                "custom": ".{customExt}"
+              }
+            }
+          }
+        }
+      ],
+      "groups": [
+        { "id": "output", "label": "Output", "order": 1 },
+        { "id": "quality", "label": "Quality", "order": 2 },
+        { "id": "advanced", "label": "Advanced", "order": 3 }
+      ],
+      "params": [
+        {
+          "id": "format",
+          "label": "Output format",
+          "group": "output",
+          "type": "enum",
+          "default": "webp",
+          "options": [
+            { "value": "jpg", "label": "JPEG" },
+            { "value": "png", "label": "PNG" },
+            { "value": "webp", "label": "WebP" },
+            { "value": "tiff", "label": "TIFF" },
+            { "value": "bmp", "label": "BMP" },
+            { "value": "custom", "label": "Custom extension" }
+          ]
+        },
+        {
+          "id": "customExt",
+          "label": "Custom extension",
+          "help": "File extension without the dot",
+          "group": "output",
+          "type": "string",
+          "default": "webp",
+          "visibleWhen": { "eq": [{ "param": "format" }, { "literal": "custom" }] }
+        },
+        {
+          "id": "quality",
+          "label": "Quality",
+          "help": "1-100, higher = better quality, larger file.",
+          "group": "quality",
+          "type": "int",
+          "default": 80,
+          "min": 1,
+          "max": 100,
+          "visibleWhen": { "in": [{ "param": "format" }, ["jpg", "webp", "tiff"]] }
+        },
+        {
+          "id": "strip",
+          "label": "Strip metadata",
+          "help": "Remove EXIF, IPTC, XMP and other metadata.",
+          "group": "advanced",
+          "type": "bool",
+          "default": true
+        }
+      ],
+      "args": [
+        {
+          "kind": "positional",
+          "value": { "literal": "copy" }
+        },
+        {
+          "kind": "positional",
+          "value": { "in": "src" }
+        },
+        {
+          "kind": "positional",
+          "value": {
+            "format": "{out:dst}[{saveOptions}]"
+          }
+        }
+      ],
+      "progress": {
+        "parser": "none"
+      }
+    },
+    {
+      "id": "info",
+      "name": "Image Info",
+      "description": "View image metadata, dimensions, and format information.",
+      "binary": "vipsheader",
+      "inputs": [
+        {
+          "id": "src",
+          "label": "Input image",
+          "kind": "file",
+          "accepts": {
+            "types": ["image"],
+            "extensions": [".png", ".jpg", ".jpeg", ".webp", ".tiff", ".tif", ".bmp", ".gif", ".svg"]
+          },
+          "required": true
+        }
+      ],
+      "outputs": [],
+      "groups": [
+        { "id": "options", "label": "Options", "order": 1 }
+      ],
+      "params": [
+        {
+          "id": "allFields",
+          "label": "Show all fields",
+          "help": "Display all header fields, not just the summary.",
+          "group": "options",
+          "type": "bool",
+          "default": false
+        }
+      ],
+      "args": [
+        {
+          "kind": "flag",
+          "flag": "-a",
+          "when": { "eq": [{ "param": "allFields" }, { "literal": true }] }
+        },
+        {
+          "kind": "positional",
+          "value": { "in": "src" }
+        }
+      ],
+      "progress": {
+        "parser": "none"
+      }
+    }
+  ],
+  "smoke": {
+    "helpArgs": ["--version"],
+    "mustMention": ["vips"]
+  }
+}
