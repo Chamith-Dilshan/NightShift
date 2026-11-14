@@ -61,3 +61,25 @@ The `v0.1.0` git tag does not exist locally (only `sidecar-prototype`). The curr
 - User specs: Allowed from local specs folder, no remote spec install
 - FFmpeg builtin: Keep v0.1 video panels and videoSlice as builtin
 - Project licence: Keep existing LICENSE
+
+---
+
+## 2026-11-14: M4 — libvips Manifest Decision (T-4.5)
+
+### libvips Windows Download Source
+**Decision:** Use **kleisauke/libvips-packaging** as the managed download source for Windows.
+- URL: `https://github.com/kleisauke/libvips-packaging/releases/download/v8.18.7/libvips-8.18.7-win-x64.tar.gz`
+- SHA-256: `e125ead87ace527ce77e78faa1af3b7051dc0e91a9948693329941dbe3c9f373`
+- Licence: LGPL-3.0 (same as libvips core)
+- This is the same source used by pyvips[binary] on Windows
+- No macOS/Linux managed download — users install via Homebrew/apt with hints
+
+### libvips Spec Authoring
+**Fact verified:** libvips 8.18.7 is installed on this machine. The spec was authored from real `--help` output.
+- `vips copy input output` — re-encode operation
+- `vipsthumbnail input -s WIDTHxHEIGHT` — resize operation
+- `vipsheader input` — metadata viewer
+- Save options are appended to output filename in brackets (e.g., `out.jpg[Q=90,strip]`)
+
+### Manifest Schema Migration
+**Decision:** Migrate tools-manifest.json from schema v1 (`platforms`/`files`) to schema v2 (`artifacts`/`bins`) per the plan section 9.1.

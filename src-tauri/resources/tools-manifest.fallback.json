@@ -1,15 +1,16 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "tools": {
     "ffmpeg": {
       "version": "7.1",
       "license": "GPL-3.0",
-      "platforms": {
+      "homepage": "https://ffmpeg.org",
+      "artifacts": {
         "windows-x86_64": {
           "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip",
           "sha256": "",
           "archive": "zip",
-          "files": {
+          "bins": {
             "ffmpeg": "bin/ffmpeg.exe",
             "ffprobe": "bin/ffprobe.exe"
           }
@@ -18,7 +19,7 @@
           "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz",
           "sha256": "",
           "archive": "tar.xz",
-          "files": {
+          "bins": {
             "ffmpeg": "bin/ffmpeg",
             "ffprobe": "bin/ffprobe"
           }
@@ -27,7 +28,7 @@
           "url": "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linuxarm64-gpl.tar.xz",
           "sha256": "",
           "archive": "tar.xz",
-          "files": {
+          "bins": {
             "ffmpeg": "bin/ffmpeg",
             "ffprobe": "bin/ffprobe"
           }
@@ -36,7 +37,7 @@
           "url": "https://evermeet.cx/ffmpeg/getrelease/zip",
           "sha256": "",
           "archive": "zip",
-          "files": {
+          "bins": {
             "ffmpeg": "ffmpeg",
             "ffprobe": "ffprobe"
           }
@@ -45,9 +46,26 @@
           "url": "https://evermeet.cx/ffmpeg/getrelease/zip",
           "sha256": "",
           "archive": "zip",
-          "files": {
+          "bins": {
             "ffmpeg": "ffmpeg",
             "ffprobe": "ffprobe"
+          }
+        }
+      }
+    },
+    "vips": {
+      "version": "8.18.7",
+      "license": "LGPL-3.0",
+      "homepage": "https://libvips.org",
+      "artifacts": {
+        "windows-x86_64": {
+          "url": "https://github.com/kleisauke/libvips-packaging/releases/download/v8.18.7/libvips-8.18.7-win-x64.tar.gz",
+          "sha256": "e125ead87ace527ce77e78faa1af3b7051dc0e91a9948693329941dbe3c9f373",
+          "archive": "tar.gz",
+          "bins": {
+            "vips": "bin/vips.exe",
+            "vipsthumbnail": "bin/vipsthumbnail.exe",
+            "vipsheader": "bin/vipsheader.exe"
           }
         }
       }
