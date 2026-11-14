@@ -56,41 +56,67 @@ NightShift is **not** a graphical editor and has no media preview. It builds and
 
 | | |
 |---|---|
-| **Released** | **v0.1**, the FFmpeg release (video tool, native runner, tool manager, templates, queue) |
-| **In planning** | **v0.2**, the platform core (tool specs, tool catalog, libvips, shareable templates, folder batches) |
+| **Released** | **v0.2**, the platform core (tool specs, tool catalog, libvips, shareable templates, folder batches) |
 | **Not yet available** | Anything listed under [Roadmap](#-roadmap) as planned |
-
-Features below are marked **available** or **planned** so nothing is promised that is not shipped.
 
 ---
 
-## ✨ Features (today)
+## ✨ Features
 
-### 🎬 FFmpeg video tool (available in v0.1)
+### 🧰 Tool Catalog
 
-- **Containers:** MP4, WebM, GIF and custom output targets, with codec compatibility handled for you (your selection is kept when you switch containers and back).
-- **Per-codec rules:** H.264, H.265, VP9, and AV1 each get the right rate control, speed and pixel-format arguments instead of one-size-fits-all flags.
-- **Trim:** start/end with input-side seeking (`-ss` / `-to` before `-i`).
-- **Crop:** width, height, and optional offsets, validated against the probed source dimensions.
-- **Keyframes:** set the GOP interval, including all-intra (`-g 1`) for smooth scrubbing of scroll-driven web video.
-- **Web optimization:** `yuv420p`, `+faststart`, and `hvc1` tagging for H.265 in MP4.
-- **Remove audio**, rate control (CRF or bitrate), resolution and frame-rate controls.
-- **Filters and transforms:** grayscale, blur, sharpen, saturation, rotate, flip.
-- **Watermark:** image overlay with a 9-point anchor grid, margin, and opacity.
+- **Browse tools:** see all available tools with status badges — installed, detected on your system, or missing.
+- **Install or locate:** for each tool you can use a managed download (SHA-256 verified), detect an existing system install, or point to an executable yourself.
+- **Custom tools:** add any CLI executable as a custom tool with a raw-command workbench.
+- **Bundled tools:** **FFmpeg** (video/audio) and **libvips** (image processing) ship as first-class tools with full parameter panels.
+
+### 📋 Spec Engine
+
+- **Declarative tool specs:** each tool is described by a JSON spec — binaries, commands, parameters, validation rules, argument templates, and progress parsers.
+- **Auto-generated forms:** parameter panels are generated from the spec, so new tools ship without writing UI code.
+- **Expression language:** conditional visibility, enabled states, and value mapping — no `eval`, no dynamic code.
+- **Pure TypeScript core:** `src/core/` contains no React, Redux, or Tauri dependencies, making it reusable in a future headless CLI.
+
+### 📄 Templates
+
+- **Save and reuse:** any tool configuration (visual form or raw command) can be saved as a template.
+- **Shareable files:** export templates as `.nightshift-template.json` files or packs (`.nightshift-pack.json`).
+- **Import with review:** before saving, a review screen shows required tools, mode, resolved command preview, and security warnings.
+- **Path safety:** file paths are stripped on export and recorded as gaps; the importer chooses local files.
+- **Library management:** search, filter by tool, tag, duplicate, rename, delete, and apply templates.
+- **Built-in presets:** four FFmpeg presets (web MP4, web WebM, scroll-scrub, small GIF) ship as read-only templates.
+
+### 📦 Batch Processing
+
+- **Folder and file inputs:** select individual files or entire folders as batch inputs.
+- **Output options:** choose output directory, flat or mirrored structure, name patterns (`{name}`, `{index}`, `{ext}`, `{parent}`, `{date}`), and conflict policy (rename, overwrite, skip).
+- **Dry-run plan:** review a table of all planned jobs with input/output paths before running.
+- **Concurrency:** run jobs in parallel (default 1, up to logical cores).
+- **Failure policy:** continue on failure or stop at the first error.
+- **Summary:** on completion see counts, wall time, bytes before/after, and per-failure error lines.
+
+### 🎬 FFmpeg Video Tool
+
+FFmpeg is the first tool on the platform, with a rich built-in panel:
+
+- **Containers:** MP4, WebM, GIF and custom output targets, with codec compatibility handled for you.
+- **Per-codec rules:** H.264, H.265, VP9, and AV1 each get the right rate control, speed and pixel-format arguments.
+- **Trim, crop, keyframes, filters, transforms, watermark** — all v0.1 features remain unchanged.
 - **Encoder detection:** checks your FFmpeg build and disables codecs it does not include.
 
-### ⚡ Command generation (available)
+### ⚡ Command Generation
 
 - **Deterministic:** command arguments are built by a pure function from your settings, with no UI side effects.
 - **Visible and editable:** the live command preview can be copied or edited by hand (manual mode), then reset back to the form.
 - **Validation before running:** invalid combinations are blocked with an explanation.
 - **Live logs:** structured progress, speed and timecode from the native runner, correct exit codes, and cancel.
 
-### 📦 Queue and templates (available)
+### 🔒 Security
 
-- **Sequential queue:** one job per input file, with per-job progress, cancel, retry, and "reveal in folder".
-- **Templates:** save, load, rename, import, and export configurations, stored on disk.
-- **Built-in presets:** quick starting points such as a web MP4, a web WebM, scroll-scrub video, and a small GIF.
+- **No shell:** commands are executed as argv arrays, never through a shell.
+- **No bundled binaries:** tools are downloaded (SHA-256 verified), detected, or user-pointed — never redistributed.
+- **Template review:** imported templates are reviewed before saving; raw mode, URL schemes, and absolute paths trigger warnings.
+- **File size limits:** templates ≤ 1 MB, packs ≤ 200 templates, argv tokens ≤ 10,000.
 
 ---
 
@@ -106,8 +132,9 @@ Features below are marked **available** or **planned** so nothing is promised th
 
 NightShift does **not** ship tool binaries inside its installer. This keeps the download small and avoids redistributing other projects' software.
 
-- **Today (v0.1):** on first launch the setup wizard looks for FFmpeg and ffprobe on your system, or downloads a verified build into your user data folder. Downloads are checked against SHA-256 hashes listed in `tools-manifest.json`.
-- **Planned (v0.2):** a **tool catalog** where you choose which tools to install. For each tool you can use a managed download, detect an existing install, or point to an executable yourself. Where no download exists, NightShift shows install hints for your platform's package manager.
+- **Tool catalog:** browse available tools and choose which ones to install. For each tool you can use a managed download (SHA-256 verified), detect an existing system install, or point to an executable yourself.
+- **Custom tools:** add any CLI executable as a custom tool. It gets a raw-command workbench and works with templates and batch.
+- **Install hints:** where no managed download exists (e.g., libvips on macOS/Linux), NightShift shows copyable install commands for your platform's package manager.
 
 Tools you install keep their own licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
@@ -173,20 +200,38 @@ cargo test --manifest-path src-tauri/Cargo.toml
 
 ## 🏗️ Architecture
 
-- **Tauri v2 (Rust)** hosts the app and owns process execution: no shell, argument arrays only, structured progress parsing, cancel, and tool management.
-- **Next.js (static export)** renders the UI.
-- **Redux Toolkit** holds tool settings; a pure command builder turns them into arguments.
-- **No local web server and no sidecar.** The frontend never supplies an executable path; Rust resolves tools.
+NightShift is a **platform for CLI tools**. Each tool is described by a declarative JSON spec, and the app generates forms, builds commands, and runs them through a native Rust engine.
 
 ```
- UI (Next.js)  ──>  Redux state  ──>  Pure command builder
-                                              │ argv
-                                              ▼
-                      Tauri (Rust): job runner · tool manager
-                                              │ spawn (no shell)
-                                              ▼
-                                   Installed command-line tools
+┌───────────────────────────────────────────────────────────────────────────┐
+│ UI (Next.js client components)                                            │
+│  Home/Catalog · Tool workbench (SpecPanel | builtin panel) · Templates    │
+│  Batch panel · Queue/Terminal · Settings                                  │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Redux: workbenchSlice (generic) · videoSlice (ffmpeg, unchanged)          │
+│        templatesSlice · jobsSlice · batchesSlice · toolsSlice             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ src/core  (PURE TypeScript, no React/Redux/Tauri)                         │
+│  spec/{schema, argBuilder, expr, versions}                                │
+│  template/{schema, io, review, variables}                                 │
+│  batch/{naming, plan}                                                     │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Executor (Tauri | Mock)                                                   │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Rust: spec loader · tool registry · run_job/cancel_job · probe            │
+│       expand_inputs · check_paths · settings v2 · install pipeline        │
+└─────────────────────────┬─────────────────────────────────────────────────┘
+                          │ spawn (argv, no shell)
+              ┌───────────▼───────────┐ ┌──────────────┐ ┌───────────────┐
+              │ ffmpeg/ffprobe        │ │ vips family  │ │ user.<tool>   │ …
+              └───────────────────────┘ └──────────────┘ └───────────────┘
 ```
+
+- **Tauri v2 (Rust)** hosts the app and owns process execution: no shell, argument arrays only, structured progress parsing, cancel, and tool management.
+- **Next.js (static export)** renders the UI.
+- **Redux Toolkit** holds state; a pure spec engine builds commands from parameters.
+- **`src/core/` is pure TypeScript:** no React, Redux, or Tauri — reusable in a future headless CLI.
+- **No local web server and no sidecar.** The frontend never supplies an executable path; Rust resolves tools.
 
 Details live in [APP_ARCHITECTURE.md](APP_ARCHITECTURE.md). Long-term direction and decisions are in [PROJECT_BIBLE.md](PROJECT_BIBLE.md).
 
@@ -196,14 +241,14 @@ Details live in [APP_ARCHITECTURE.md](APP_ARCHITECTURE.md). Long-term direction 
 
 **Done**
 - [x] **v0.1:** native Rust runner, FFmpeg video tool, tool manager, sequential queue, templates, installers.
+- [x] **v0.2, platform core:** declarative tool specs, tool catalog, custom tools, **libvips** as the second tool, shareable templates with import security, batch processing with dry-run plans, workflow design document.
 
 **Planned**
-- [ ] **v0.2, platform core:** declarative tool specs; a tool catalog; custom tools (point NightShift at any executable); **libvips** as the second tool; reusable templates you can import, export, and share; batch processing over files and folders with a dry-run plan.
-- [ ] **v0.3, workflows:** chain several tools into reusable workflows (think a node graph for CLI tools), with caching and a headless command-line runner for automation.
+- [ ] **v0.3, workflows:** chain several tools into reusable workflows (multi-node DAGs), with typed ports, caching, partial reruns, and a headless command-line runner (`nightshift run`). Design: [docs/WORKFLOWS_DESIGN.md](docs/WORKFLOWS_DESIGN.md).
 - [ ] **v0.4, editor and extensions:** visual workflow editor, interactive terminal, optional extensions for tools that need other runtimes.
-- [ ] **Later:** more tools (image, audio, document, and forensic tools), a way to share templates and specs, and optional AI-assisted command building with your own keys or local models.
+- [ ] **Later:** more tools (audio, document, and forensic tools), a template/spec registry with signed packages, and optional AI-assisted command building with your own keys or local models.
 
-**FFmpeg tool backlog:** two-pass VBR encoding, HDR-to-SDR tone mapping, hardware encoders, and decoders (`nvenc`, `qsv`, `vaapi`, `videotoolbox`).
+**FFmpeg tool backlog:** two-pass VBR encoding, HDR-to-SDR tone mapping, hardware encoders and decoders (`nvenc`, `qsv`, `vaapi`, `videotoolbox`).
 
 The roadmap is a plan, not a promise. Priorities shift with feedback, so open an issue to tell us what you would use NightShift for.
 
